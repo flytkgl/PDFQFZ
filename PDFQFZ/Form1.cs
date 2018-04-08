@@ -23,10 +23,22 @@ namespace PDFQFZ
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if(textGZpath.Text!=""&& textBCpath.Text!=""&& pathText.Text!="")
+            {
+                pdfGz();
+            }
+            else
+            {
+                MessageBox.Show("文件路径不能为空，请先选择路径。");
+            }
+        }
+
+        public void pdfGz()
+        {
             DirectoryInfo dir = new DirectoryInfo(pathText.Text);
             var fileInfos = dir.GetFiles();
-            string sourcepath= pathText.Text;//需盖章目录
-            string outputpath= textBCpath.Text;//保存目录
+            string sourcepath = pathText.Text;//需盖章目录
+            string outputpath = textBCpath.Text;//保存目录
             string watermark = textGZpath.Text;  // 水印图片
 
             if (!Directory.Exists(outputpath))//输出目录不存在则新建
@@ -36,7 +48,7 @@ namespace PDFQFZ
 
             log.Text = "";//清空日志
 
-                try
+            try
             {
                 foreach (var fileInfo in fileInfos)
                 {
@@ -45,10 +57,11 @@ namespace PDFQFZ
                     bool isSurrcess = PDFWatermark(source, output, watermark);
                     if (isSurrcess)
                     {
-                        log.Text = log.Text + "成功！“" + fileInfo.Name.ToString() + "” 盖章完成！\r\n";
-                    }else
+                        log.Text = log.Text + "成功！“" + fileInfo.Name.ToString() + "”盖章完成！\r\n";
+                    }
+                    else
                     {
-                        log.Text = log.Text + "失败！“" + fileInfo.Name.ToString() + "” 盖章失败！\r\n";
+                        log.Text = log.Text + "失败！“" + fileInfo.Name.ToString() + "”盖章失败！\r\n";
                     }
                 }
             }
@@ -58,8 +71,7 @@ namespace PDFQFZ
             }
         }
 
-
-        public static Bitmap[] subImages(String imgPath, int n)
+        public static Bitmap[] subImages(String imgPath, int n)//图片分割
         {
             Bitmap[] nImage = new Bitmap[n];
             Bitmap img = new Bitmap(imgPath);
@@ -145,7 +157,10 @@ namespace PDFQFZ
             if (fbd.ShowDialog() == DialogResult.OK)
             {
                 pathText.Text = fbd.SelectedPath;
-                textBCpath.Text = fbd.SelectedPath + "\\QFZ";
+                if (textBCpath.Text == "")
+                {
+                    textBCpath.Text = fbd.SelectedPath + "\\QFZ";
+                }
             }
         }
 

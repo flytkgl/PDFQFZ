@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.bt_gz = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.pathText = new System.Windows.Forms.TextBox();
@@ -135,6 +136,7 @@
             this.log.Location = new System.Drawing.Point(12, 171);
             this.log.Multiline = true;
             this.log.Name = "log";
+            this.log.ReadOnly = true;
             this.log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.log.Size = new System.Drawing.Size(435, 108);
             this.log.TabIndex = 10;
@@ -156,6 +158,7 @@
             this.Controls.Add(this.pathText);
             this.Controls.Add(this.bt_gz);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "PDF加盖骑缝章";
