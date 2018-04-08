@@ -182,5 +182,13 @@ namespace PDFQFZ
                 textGZpath.Text = file.FileName;
             }
         }
+
+        private void clear_Click(object sender, EventArgs e)
+        {
+            pathText.Text = "";
+            textBCpath.Text = "";
+            textGZpath.Text = "";
+            log.Text = "";
+        }
     }
 }

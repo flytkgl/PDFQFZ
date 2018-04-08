@@ -41,6 +41,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.log = new System.Windows.Forms.TextBox();
+            this.clear = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // bt_gz
@@ -144,11 +145,22 @@
             this.log.Size = new System.Drawing.Size(423, 108);
             this.log.TabIndex = 10;
             // 
+            // clear
+            // 
+            this.clear.Location = new System.Drawing.Point(360, 142);
+            this.clear.Name = "clear";
+            this.clear.Size = new System.Drawing.Size(75, 23);
+            this.clear.TabIndex = 11;
+            this.clear.Text = "清空";
+            this.clear.UseVisualStyleBackColor = true;
+            this.clear.Click += new System.EventHandler(this.clear_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(448, 291);
+            this.Controls.Add(this.clear);
             this.Controls.Add(this.log);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -184,6 +196,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox log;
+        private System.Windows.Forms.Button clear;
     }
 }
 
