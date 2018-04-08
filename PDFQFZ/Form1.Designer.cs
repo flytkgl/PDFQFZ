@@ -45,7 +45,7 @@
             // 
             // bt_gz
             // 
-            this.bt_gz.Location = new System.Drawing.Point(194, 142);
+            this.bt_gz.Location = new System.Drawing.Point(186, 142);
             this.bt_gz.Name = "bt_gz";
             this.bt_gz.Size = new System.Drawing.Size(75, 23);
             this.bt_gz.TabIndex = 0;
@@ -55,14 +55,15 @@
             // 
             // pathText
             // 
-            this.pathText.Location = new System.Drawing.Point(15, 28);
+            this.pathText.Location = new System.Drawing.Point(96, 29);
             this.pathText.Name = "pathText";
+            this.pathText.ReadOnly = true;
             this.pathText.Size = new System.Drawing.Size(339, 21);
             this.pathText.TabIndex = 1;
             // 
             // SelectPath
             // 
-            this.SelectPath.Location = new System.Drawing.Point(372, 28);
+            this.SelectPath.Location = new System.Drawing.Point(12, 28);
             this.SelectPath.Name = "SelectPath";
             this.SelectPath.Size = new System.Drawing.Size(75, 23);
             this.SelectPath.TabIndex = 2;
@@ -72,21 +73,23 @@
             // 
             // textBCpath
             // 
-            this.textBCpath.Location = new System.Drawing.Point(15, 72);
+            this.textBCpath.Location = new System.Drawing.Point(97, 72);
             this.textBCpath.Name = "textBCpath";
-            this.textBCpath.Size = new System.Drawing.Size(339, 21);
+            this.textBCpath.ReadOnly = true;
+            this.textBCpath.Size = new System.Drawing.Size(338, 21);
             this.textBCpath.TabIndex = 3;
             // 
             // textGZpath
             // 
-            this.textGZpath.Location = new System.Drawing.Point(15, 115);
+            this.textGZpath.Location = new System.Drawing.Point(96, 116);
             this.textGZpath.Name = "textGZpath";
+            this.textGZpath.ReadOnly = true;
             this.textGZpath.Size = new System.Drawing.Size(339, 21);
             this.textGZpath.TabIndex = 4;
             // 
             // OutPath
             // 
-            this.OutPath.Location = new System.Drawing.Point(373, 72);
+            this.OutPath.Location = new System.Drawing.Point(12, 71);
             this.OutPath.Name = "OutPath";
             this.OutPath.Size = new System.Drawing.Size(75, 23);
             this.OutPath.TabIndex = 5;
@@ -96,7 +99,7 @@
             // 
             // GzPath
             // 
-            this.GzPath.Location = new System.Drawing.Point(373, 115);
+            this.GzPath.Location = new System.Drawing.Point(12, 115);
             this.GzPath.Name = "GzPath";
             this.GzPath.Size = new System.Drawing.Size(75, 23);
             this.GzPath.TabIndex = 6;
@@ -107,7 +110,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 13);
+            this.label1.Location = new System.Drawing.Point(10, 14);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(191, 12);
             this.label1.TabIndex = 7;
@@ -116,7 +119,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(15, 56);
+            this.label2.Location = new System.Drawing.Point(10, 57);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(179, 12);
             this.label2.TabIndex = 8;
@@ -125,7 +128,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(17, 100);
+            this.label3.Location = new System.Drawing.Point(10, 100);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(89, 12);
             this.label3.TabIndex = 9;
@@ -138,14 +141,14 @@
             this.log.Name = "log";
             this.log.ReadOnly = true;
             this.log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.log.Size = new System.Drawing.Size(435, 108);
+            this.log.Size = new System.Drawing.Size(423, 108);
             this.log.TabIndex = 10;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(465, 291);
+            this.ClientSize = new System.Drawing.Size(448, 291);
             this.Controls.Add(this.log);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
