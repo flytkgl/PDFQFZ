@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2015
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PDFQFZ", "PDFQFZ\PDFQFZ.csproj", "{C9DB39C1-307A-4B57-AB38-432FDD5EEE15}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C9DB39C1-307A-4B57-AB38-432FDD5EEE15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9DB39C1-307A-4B57-AB38-432FDD5EEE15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9DB39C1-307A-4B57-AB38-432FDD5EEE15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9DB39C1-307A-4B57-AB38-432FDD5EEE15}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2764806B-A4CF-4E1E-8157-E3EAAE354D11}
+	EndGlobalSection
+EndGlobal
