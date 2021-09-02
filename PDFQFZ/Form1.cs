@@ -33,7 +33,7 @@ namespace PDFQFZ
             }
         }
 
-        public void pdfGz()
+        private void pdfGz()
         {
             DirectoryInfo dir = new DirectoryInfo(pathText.Text);
             var fileInfos = dir.GetFiles();
@@ -71,7 +71,7 @@ namespace PDFQFZ
             }
         }
 
-        public static Bitmap[] subImages(String imgPath, int n)//图片分割
+        private static Bitmap[] subImages(String imgPath, int n)//图片分割
         {
             Bitmap[] nImage = new Bitmap[n];
             Bitmap img = new Bitmap(imgPath);
@@ -90,7 +90,7 @@ namespace PDFQFZ
             return nImage;
         }
 
-        public bool PDFWatermark(string inputfilepath, string outputfilepath, string ModelPicName)
+        private bool PDFWatermark(string inputfilepath, string outputfilepath, string ModelPicName)
 
         {
             //throw new NotImplementedException();
@@ -113,26 +113,35 @@ namespace PDFQFZ
                 pdfStamper = new PdfStamper(pdfReader, new FileStream(outputfilepath, FileMode.Create));//加完印章后的pdf
 
                 PdfContentByte waterMarkContent;
-                
+
                 //每一页加水印,也可以设置某一页加水印
                 for (int i = 0; i < numberOfPages; i++)
                 {
-                    iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[i], ImageFormat.Png);
+                    iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[i], ImageFormat.Bmp);
 
-                //image.GrayFill = 20;//透明度，灰色填充
-                                    //image.Rotation//旋转
-                                    //image.RotationDegrees//旋转角度
-                                    //水印的位置
-
-                    image.SetAbsolutePosition(width-image.Width, (height - image.Height) /2);
-                    waterMarkContent = pdfStamper.GetUnderContent(i+1);
+                    //image.GrayFill = 20;//透明度，灰色填充
+                    //image.Rotation//旋转
+                    //image.RotationDegrees//旋转角度
+                    float bili = 0.24f;//印章图片由72dpi转300dpi
+                    image.ScalePercent(bili * 100);//设置图片比例
+                    image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+                    //水印的位置
+                    if (width < height) {
+                        image.SetAbsolutePosition(width - image.Width * bili, (height - image.Height * bili) / 2);
+                    }
+                    else
+                    {
+                        image.SetAbsolutePosition(height - image.Width * bili, (width - image.Height * bili) / 2);
+                    }
+                    
+                    waterMarkContent = pdfStamper.GetOverContent(i+1);
 
                     waterMarkContent.AddImage(image);
                     
 
                 }
                 //strMsg = "success";
-                
+
                 return true;
             }
             catch (Exception ex)
