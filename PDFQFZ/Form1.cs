@@ -38,7 +38,15 @@ namespace PDFQFZ
         {
             if(textGZpath.Text!=""&& textBCpath.Text!=""&& pathText.Text!="")
             {
-                pdfGz();
+                float sfsize;
+                if (float.TryParse(textBili.Text, out sfsize))
+                {
+                    pdfGz(sfsize);
+                }
+                else
+                {
+                    MessageBox.Show("印章尺寸错误,请输入正确的比例或尺寸。");
+                }
             }
             else
             {
@@ -46,13 +54,15 @@ namespace PDFQFZ
             }
         }
 
-        private void pdfGz()
+        private void pdfGz(float sfsize)
         {
             DirectoryInfo dir = new DirectoryInfo(pathText.Text);
             var fileInfos = dir.GetFiles();
             string sourcepath = pathText.Text;//需盖章目录
             string outputpath = textBCpath.Text;//保存目录
             string watermark = textGZpath.Text;  // 水印图片
+            int sftype = comboBoxBL.SelectedIndex;//印章缩放类型
+            int zyz = comboBox1.SelectedIndex;//如何加印章
 
             if (!Directory.Exists(outputpath))//输出目录不存在则新建
             {
@@ -67,7 +77,7 @@ namespace PDFQFZ
                 {
                     string source = sourcepath + "\\" + fileInfo.Name.ToString();
                     string output = outputpath + "\\" + fileInfo.Name.ToString();
-                    bool isSurrcess = PDFWatermark(source, output, watermark);
+                    bool isSurrcess = PDFWatermark(source, output, watermark, sftype, sfsize, zyz);
                     if (isSurrcess)
                     {
                         log.Text = log.Text + "成功！“" + fileInfo.Name.ToString() + "”盖章完成！\r\n";
@@ -103,12 +113,14 @@ namespace PDFQFZ
             return nImage;
         }
 
-        private bool PDFWatermark(string inputfilepath, string outputfilepath, string ModelPicName)
+        private bool PDFWatermark(string inputfilepath, string outputfilepath, string ModelPicName, int sftype, float sfsize, int zyz)
 
         {
             //throw new NotImplementedException();
             PdfReader pdfReader = null;
             PdfStamper pdfStamper = null;
+            float picbl = 1.056f;//别问我这个数值怎么来的
+            float picmm = 2.984f;//别问我这个数值怎么来的
             try
             {
                 pdfReader = new PdfReader(inputfilepath);//选择需要印章的pdf
@@ -127,8 +139,7 @@ namespace PDFQFZ
                 pdfStamper = new PdfStamper(pdfReader, new FileStream(outputfilepath, FileMode.Create));//加完印章后的pdf
 
                 PdfContentByte waterMarkContent;
-
-                int zyz = comboBox1.SelectedIndex;//如何加印章
+                
                 bool all = false;
                 int index = 0;
                 if (zyz == 3)
@@ -141,64 +152,92 @@ namespace PDFQFZ
                 {
                     index = numberOfPages;
                 }
+                int rotation = pdfReader.GetPageRotation(1);//获取指定页面的旋转度
 
                 //每一页加水印,也可以设置某一页加水印
-                for (int i = 0; i < numberOfPages;)
+                for (int i = 1; i <= numberOfPages; i++)
                 {
-                    iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[i], ImageFormat.Bmp);
-
-                    //image.GrayFill = 20;//透明度，灰色填充
-                    //image.Rotation//旋转
-                    //image.ScaleToFit(140F, 320F);//设置图片的指定大小
-                    //image.RotationDegrees//旋转角度
-                    int bili;
-                    if(!int.TryParse(textBili.Text, out bili))
-                    {
-                        bili = 24;
-                    }
-                    float result = bili / 100f;//印章图片由72dpi转300dpi
-                    image.ScalePercent(bili);//设置图片比例
-                    image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
-
-                    i++;//pdf页面是从1开始的,所以这里要+1
-                    int rotation = pdfReader.GetPageRotation(i);//获取指定页面的旋转度
-
-                    //水印的位置
-                    if (rotation == 90 || rotation == 270)
-                    {
-                        image.SetAbsolutePosition(height - image.Width * result, (width - image.Height * result) / 2);
-                    }
-                    else
-                    {
-                        image.SetAbsolutePosition(width - image.Width * result, (height - image.Height * result) / 2);
-                    }
-                    //switch (rotation)
-                    //{
-                    //    case 90:
-                    //        image.SetAbsolutePosition(height - image.Width * bili, (width - image.Height * bili) / 2);
-                    //        break;
-                    //    case 180:
-                    //        image.SetAbsolutePosition(width - image.Width * bili, (height - image.Height * bili) / 2);
-                    //        break;
-                    //    case 270:
-                    //        image.SetAbsolutePosition(height - image.Width * bili, (width - image.Height * bili) / 2);
-                    //        break;
-                    //    default:
-                    //        image.SetAbsolutePosition(width - image.Width * bili, (height - image.Height * bili) / 2);
-                    //        break;
-                    //}
-                    
                     waterMarkContent = pdfStamper.GetOverContent(i);
+                    //一页以上的PDF才需要加骑缝章
+                    if (numberOfPages > 1)
+                    {
+                        iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[i-1], ImageFormat.Bmp);
 
-                    waterMarkContent.AddImage(image);
+                        image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+                        //image.GrayFill = 20;//透明度，灰色填充
+                        //image.Rotation//旋转
+                        //image.ScaleToFit(140F, 320F);//设置图片的指定大小
+                        //image.RotationDegrees//旋转角度
+                        float sfbl, imageW, imageH;
+                        if (sftype == 0)
+                        {
+                            sfbl = sfsize * picbl;//别问我为什么要乘这个
+                            imageW = image.Width * sfbl / 100f;
+                            imageH = image.Height * sfbl / 100f;
+                            //image.ScalePercent(sfbl);//设置图片比例
+                            image.ScaleToFit(imageW, imageH);//设置图片的指定大小
+                        }
+                        else
+                        {
+                            sfbl = sfsize * picmm;//别问我为什么要乘这个
+                            imageW = sfbl / numberOfPages;
+                            imageH = sfbl;
+                            image.ScaleToFit(imageW, imageH);//设置图片的指定大小
+                        }
+                        rotation = pdfReader.GetPageRotation(i);//获取指定页面的旋转度
+
+                        //水印的位置
+                        if (rotation == 90 || rotation == 270)
+                        {
+                            image.SetAbsolutePosition(height - imageW, (width - imageH) / 2);
+                        }
+                        else
+                        {
+                            image.SetAbsolutePosition(width - imageW, (height - imageH) / 2);
+                        }
+                        //switch (rotation)
+                        //{
+                        //    case 90:
+                        //        image.SetAbsolutePosition(height - image.Width * bili, (width - image.Height * bili) / 2);
+                        //        break;
+                        //    case 180:
+                        //        image.SetAbsolutePosition(width - image.Width * bili, (height - image.Height * bili) / 2);
+                        //        break;
+                        //    case 270:
+                        //        image.SetAbsolutePosition(height - image.Width * bili, (width - image.Height * bili) / 2);
+                        //        break;
+                        //    default:
+                        //        image.SetAbsolutePosition(width - image.Width * bili, (height - image.Height * bili) / 2);
+                        //        break;
+                        //}
+
+                        waterMarkContent.AddImage(image);
+                    }
+                    
 
                     if (all || i == index)//如果是最后一页加入指定的图片
                     {
                         //创建一个图片对象                    
                         iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(ModelPicName);
 
-                        //按比例缩放
-                        img.ScalePercent(bili);
+                        img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+
+                        float sfbl,imgW, imgH;
+                        if (sftype == 0)
+                        {
+                            sfbl = sfsize * picbl;//别问我为什么要乘这个
+                            imgW = img.Width * sfbl / 100f;
+                            imgH = img.Height * sfbl / 100f;
+                            //img.ScalePercent(sfbl);//设置图片比例
+                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小
+                        }
+                        else
+                        {
+                            sfbl = sfsize * picmm;//别问我为什么要乘这个
+                            imgW = sfbl;
+                            imgH = sfbl;
+                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小
+                        }
 
                         //把图片增加到内容页的指定位子  b width c height  e bottom f left
                         //waterMarkContent.AddImage(img,0,100f,100f,0,10f,20f);
@@ -207,11 +246,11 @@ namespace PDFQFZ
                         float hbl = 1-Convert.ToSingle(textPy.Text);//这里根据比例来定位
                         if (rotation == 90 || rotation == 270)
                         {
-                            img.SetAbsolutePosition((height - img.Width * result) * wbl, (width - img.Height * result) * hbl);
+                            img.SetAbsolutePosition((height - imgW) * wbl, (width - imgH) * hbl);
                         }
                         else
                         {
-                            img.SetAbsolutePosition((width - img.Width * result) * wbl, (height - img.Height * result) * hbl);
+                            img.SetAbsolutePosition((width - imgW) * wbl, (height - imgH) * hbl);
                         }
                         waterMarkContent.AddImage(img);
 
@@ -291,12 +330,13 @@ namespace PDFQFZ
             pathText.Text = "";
             textBCpath.Text = "";
             textGZpath.Text = "";
-            log.Text = "";
+            log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40mm印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可,如果想直接设置图片尺寸也是可以的,但是要注意只支持正方形的图片";
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             comboBox1.SelectedIndex = 0;
+            comboBoxBL.SelectedIndex = 0;
             fw = this.Width;
             fh = this.Height;
         }
@@ -312,11 +352,51 @@ namespace PDFQFZ
             textPy.Text = py.ToString("#0.0000");
         }
 
+        private void comboBoxBL_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            if (comboBoxBL.SelectedIndex != 0)
+            {
+                label7.Text = "mm";
+                textBili.Text = "40";
+            }
+            else
+            {
+                label7.Text = "%";
+                textBili.Text = "100";
+            }
+        }
+
+        private void buttonYLT_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog file = new OpenFileDialog();
+            file.Filter = "图片文件|*.jpg;*.png";
+            if (file.ShowDialog() == DialogResult.OK)
+            {
+                System.Drawing.Image img = System.Drawing.Image.FromFile(file.FileName);
+                float imgW = img.Width;
+                float imgH = img.Height;
+                float imgBl = imgW / imgH;
+                if (imgBl < 1)
+                {
+                    pictureBox1.Width = Convert.ToInt32(250 * imgBl);
+                    pictureBox1.Height = 250;
+                    pictureBox1.Location = new Point(450+(250- pictureBox1.Width)/2, 43);
+                }
+                else
+                {
+                    pictureBox1.Width = 250;
+                    pictureBox1.Height = Convert.ToInt32(250 / imgBl);
+                    pictureBox1.Location = new Point(450, 43 + (250 - pictureBox1.Height) / 2);
+                }
+                pictureBox1.Image = img;
+            }
+        }
+
         private void comboBox1_SelectionChangeCommitted(object sender, EventArgs e)
         {
             if (comboBox1.SelectedIndex != 0)
             {
-                this.Size = new Size(fw+200, fh);
+                this.Size = new Size(fw+267, fh);
             }
             else
             {

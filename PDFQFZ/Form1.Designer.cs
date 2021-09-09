@@ -48,17 +48,18 @@
             this.textPx = new System.Windows.Forms.TextBox();
             this.textPy = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
             this.textBili = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.buttonYLT = new System.Windows.Forms.Button();
+            this.comboBoxBL = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // bt_gz
             // 
-            this.bt_gz.Location = new System.Drawing.Point(279, 142);
+            this.bt_gz.Location = new System.Drawing.Point(299, 143);
             this.bt_gz.Name = "bt_gz";
-            this.bt_gz.Size = new System.Drawing.Size(75, 23);
+            this.bt_gz.Size = new System.Drawing.Size(65, 23);
             this.bt_gz.TabIndex = 0;
             this.bt_gz.Text = "盖章";
             this.bt_gz.UseVisualStyleBackColor = true;
@@ -152,14 +153,16 @@
             this.log.Name = "log";
             this.log.ReadOnly = true;
             this.log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.log.Size = new System.Drawing.Size(423, 108);
+            this.log.Size = new System.Drawing.Size(423, 148);
             this.log.TabIndex = 10;
+            this.log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40m" +
+    "m印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可,如果想直接设置图片尺寸也是可以的,但是要注意只支持正方形的图片";
             // 
             // clear
             // 
-            this.clear.Location = new System.Drawing.Point(360, 142);
+            this.clear.Location = new System.Drawing.Point(370, 143);
             this.clear.Name = "clear";
-            this.clear.Size = new System.Drawing.Size(75, 23);
+            this.clear.Size = new System.Drawing.Size(65, 23);
             this.clear.TabIndex = 11;
             this.clear.Text = "清空";
             this.clear.UseVisualStyleBackColor = true;
@@ -170,22 +173,22 @@
             this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Items.AddRange(new object[] {
-            "只盖骑缝章",
+            "只盖骑缝章(单页无效)",
             "尾页加印章",
             "首页加印章",
             "所有页加印章"});
-            this.comboBox1.Location = new System.Drawing.Point(152, 143);
+            this.comboBox1.Location = new System.Drawing.Point(148, 144);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 20);
+            this.comboBox1.Size = new System.Drawing.Size(145, 20);
             this.comboBox1.TabIndex = 12;
             this.comboBox1.SelectionChangeCommitted += new System.EventHandler(this.comboBox1_SelectionChangeCommitted);
             // 
             // pictureBox1
             // 
             this.pictureBox1.Image = global::PDFQFZ.Properties.Resources.ylt;
-            this.pictureBox1.Location = new System.Drawing.Point(462, 14);
+            this.pictureBox1.Location = new System.Drawing.Point(492, 43);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(174, 243);
+            this.pictureBox1.Size = new System.Drawing.Size(177, 250);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 13;
             this.pictureBox1.TabStop = false;
@@ -194,7 +197,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(460, 267);
+            this.label4.Location = new System.Drawing.Point(490, 302);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(17, 12);
             this.label4.TabIndex = 14;
@@ -202,37 +205,30 @@
             // 
             // textPx
             // 
-            this.textPx.Location = new System.Drawing.Point(483, 263);
+            this.textPx.Location = new System.Drawing.Point(513, 298);
             this.textPx.Name = "textPx";
             this.textPx.ReadOnly = true;
             this.textPx.Size = new System.Drawing.Size(60, 21);
             this.textPx.TabIndex = 15;
+            this.textPx.Text = "0";
             // 
             // textPy
             // 
-            this.textPy.Location = new System.Drawing.Point(576, 263);
+            this.textPy.Location = new System.Drawing.Point(609, 298);
             this.textPy.Name = "textPy";
             this.textPy.ReadOnly = true;
             this.textPy.Size = new System.Drawing.Size(60, 21);
             this.textPy.TabIndex = 16;
+            this.textPy.Text = "0";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(553, 267);
+            this.label5.Location = new System.Drawing.Point(586, 302);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(17, 12);
             this.label5.TabIndex = 17;
             this.label5.Text = "Y:";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 148);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(77, 12);
-            this.label6.TabIndex = 18;
-            this.label6.Text = "印章缩放比例";
             // 
             // textBili
             // 
@@ -240,7 +236,7 @@
             this.textBili.Name = "textBili";
             this.textBili.Size = new System.Drawing.Size(23, 21);
             this.textBili.TabIndex = 19;
-            this.textBili.Text = "24";
+            this.textBili.Text = "100";
             // 
             // label7
             // 
@@ -251,14 +247,38 @@
             this.label7.TabIndex = 20;
             this.label7.Text = "%";
             // 
+            // buttonYLT
+            // 
+            this.buttonYLT.Location = new System.Drawing.Point(513, 14);
+            this.buttonYLT.Name = "buttonYLT";
+            this.buttonYLT.Size = new System.Drawing.Size(132, 23);
+            this.buttonYLT.TabIndex = 21;
+            this.buttonYLT.Text = "设置自定义预览图";
+            this.buttonYLT.UseVisualStyleBackColor = true;
+            this.buttonYLT.Click += new System.EventHandler(this.buttonYLT_Click);
+            // 
+            // comboBoxBL
+            // 
+            this.comboBoxBL.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxBL.FormattingEnabled = true;
+            this.comboBoxBL.Items.AddRange(new object[] {
+            "印章比例",
+            "印章尺寸"});
+            this.comboBoxBL.Location = new System.Drawing.Point(13, 144);
+            this.comboBoxBL.Name = "comboBoxBL";
+            this.comboBoxBL.Size = new System.Drawing.Size(74, 20);
+            this.comboBoxBL.TabIndex = 22;
+            this.comboBoxBL.SelectionChangeCommitted += new System.EventHandler(this.comboBoxBL_SelectionChangeCommitted);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(448, 291);
+            this.ClientSize = new System.Drawing.Size(447, 331);
+            this.Controls.Add(this.comboBoxBL);
+            this.Controls.Add(this.buttonYLT);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.textBili);
-            this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textPy);
             this.Controls.Add(this.textPx);
@@ -281,7 +301,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章";
+            this.Text = "PDF加盖骑缝章 V1.2";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -310,9 +330,10 @@
         private System.Windows.Forms.TextBox textPx;
         private System.Windows.Forms.TextBox textPy;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textBili;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button buttonYLT;
+        private System.Windows.Forms.ComboBox comboBoxBL;
     }
 }
 
