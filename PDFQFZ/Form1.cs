@@ -119,8 +119,8 @@ namespace PDFQFZ
             //throw new NotImplementedException();
             PdfReader pdfReader = null;
             PdfStamper pdfStamper = null;
-            float picbl = 1.056f;//别问我这个数值怎么来的
-            float picmm = 2.984f;//别问我这个数值怎么来的
+            float picbl = 1.003f;//别问我这个数值怎么来的
+            float picmm = 2.842f;//别问我这个数值怎么来的
             try
             {
                 pdfReader = new PdfReader(inputfilepath);//选择需要印章的pdf
