@@ -11,6 +11,10 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.text.html.simpleparser;
 using System.Drawing.Imaging;
+using iTextSharp.text.pdf.security;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.X509;
+using Org.BouncyCastle.Crypto.Parameters;
 
 namespace PDFQFZ
 {
@@ -169,6 +173,7 @@ namespace PDFQFZ
             float picbl = 1.003f;//别问我这个数值怎么来的
             float picmm = 2.842f;//别问我这个数值怎么来的
             float tmd = 0.6f;//印章图片整体透明度
+            bool isSign = false;//是否数字签名
 
             //throw new NotImplementedException();
             PdfReader pdfReader = null;
@@ -176,7 +181,15 @@ namespace PDFQFZ
             try
             {
                 pdfReader = new PdfReader(inputfilepath);//选择需要印章的pdf
-                pdfStamper = new PdfStamper(pdfReader, new FileStream(outputfilepath, FileMode.Create));//加完印章后的pdf
+                if (isSign)
+                {
+                    pdfStamper = PdfStamper.CreateSignature(pdfReader, new FileStream(outputfilepath, FileMode.Create), '\0', null, true);//加完印章后的pdf
+                }
+                else
+                {
+                    pdfStamper = new PdfStamper(pdfReader,new FileStream(outputfilepath,FileMode.Create));
+                }
+                
                 int numberOfPages = pdfReader.NumberOfPages;//pdf页数
                 
                 PdfContentByte waterMarkContent;
@@ -230,15 +243,20 @@ namespace PDFQFZ
                                 imageH = sfbl;
                                 image.ScaleToFit(imageW, imageH);//设置图片的指定大小
                             }
+
                             //水印的位置
+                            float xPos, yPos;
                             if (rotation == 90 || rotation == 270)
                             {
-                                image.SetAbsolutePosition(psize.Height - imageW, (psize.Width - imageH) * (100 - qfzwzbl) / 100);
+                                xPos = psize.Height - imageW;
+                                yPos = (psize.Width - imageH) * (100 - qfzwzbl) / 100;
                             }
                             else
                             {
-                                image.SetAbsolutePosition(psize.Width - imageW, (psize.Height - imageH) * (100 - qfzwzbl) / 100);
+                                xPos = psize.Width - imageW;
+                                yPos = (psize.Height - imageH) * (100 - qfzwzbl) / 100;
                             }
+                            image.SetAbsolutePosition(xPos,yPos);
                             waterMarkContent.AddImage(image);
                             waterMarkContent.RestoreState();
                         }
@@ -295,16 +313,20 @@ namespace PDFQFZ
                         //把图片增加到内容页的指定位子  b width c height  e bottom f left
                         //waterMarkContent.AddImage(img,0,100f,100f,0,10f,20f);
 
+                        float xPos,yPos;
                         float wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
                         float hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
                         if (rotation == 90 || rotation == 270)
                         {
-                            img.SetAbsolutePosition((psize.Height - imgW) * wbl, (psize.Width - imgH) * hbl);
+                            xPos = (psize.Height - imgW) * wbl;
+                            yPos = (psize.Width - imgH) * hbl;
                         }
                         else
                         {
-                            img.SetAbsolutePosition((psize.Width - imgW) * wbl, (psize.Height - imgH) * hbl);
+                            xPos = (psize.Width - imgW) * wbl;
+                            yPos = (psize.Height - imgH) * hbl;
                         }
+                        img.SetAbsolutePosition(xPos,yPos);
                         waterMarkContent.AddImage(img);
                         waterMarkContent.RestoreState();
 
@@ -322,9 +344,45 @@ namespace PDFQFZ
 
                         ////结束
                         //waterMarkContent.EndText();
+
+
+                        //最后一页加数字签名
+                        if(isSign&&i == numberOfPages)
+                        {
+                            string alias = null;
+                            Pkcs12Store store;
+
+                            string certPath = "D:\\pdfqfz.pfx";//证书路径
+                            string password = "PDFQFZ";//私钥密码
+                            store = new Pkcs12Store(new FileStream(certPath, FileMode.Open, FileAccess.Read), password.ToCharArray());
+
+                            foreach (string al in store.Aliases)
+                            {
+                                if (store.IsKeyEntry(al) && store.GetKey(al).Key.IsPrivate)
+                                {
+                                    alias = al;
+                                    break;
+                                }
+                            }
+
+                            var pk = store.GetKey(alias);
+                            ICollection<Org.BouncyCastle.X509.X509Certificate> chain = store.GetCertificateChain(alias).Select(c => c.Certificate).ToList();
+                            var parameters = pk.Key as RsaPrivateCrtKeyParameters;
+                            IExternalSignature externalSignature = new PrivateKeySignature(parameters, DigestAlgorithms.SHA256);
+                            PdfSignatureAppearance signatureAppearance = pdfStamper.SignatureAppearance;
+                            signatureAppearance.SignDate = DateTime.Now;
+                            //signatureAppearance.SignatureCreator = "pdfqfz";
+                            //signatureAppearance.Reason = "验证身份";
+                            //signatureAppearance.Location = "深圳";
+                            //signatureAppearance.SignatureGraphic = img;//iTextSharp.text.Image.GetInstance(ModelPicName);
+                            //signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC;
+                            //signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(xPos, yPos, xPos + imgW, yPos + imgH), i, "Signature");
+                            signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(0,0,0,0), i, null);
+
+                            MakeSignature.SignDetached(signatureAppearance, externalSignature, chain, null, null, null, 0, CryptoStandard.CMS);
+                        }
                     }
                 }
-
                 return true;
             }
             catch (Exception ex)
