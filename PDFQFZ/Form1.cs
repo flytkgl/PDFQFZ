@@ -168,6 +168,7 @@ namespace PDFQFZ
             float.TryParse(textWzbl.Text, out qfzwzbl);//骑缝章位置比例
             float picbl = 1.003f;//别问我这个数值怎么来的
             float picmm = 2.842f;//别问我这个数值怎么来的
+            float tmd = 0.6f;//印章图片整体透明度
 
             //throw new NotImplementedException();
             PdfReader pdfReader = null;
@@ -205,6 +206,10 @@ namespace PDFQFZ
                             iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(page);//获取当前页尺寸
                             iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[x - 1], ImageFormat.Bmp);//获取骑缝章对应页的部分
                             image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+                            waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
+                            PdfGState state = new PdfGState();
+                            state.FillOpacity = tmd;
+                            waterMarkContent.SetGState(state);
                             //image.GrayFill = 20;//透明度，灰色填充
                             //image.Rotation//旋转
                             //image.ScaleToFit(140F, 320F);//设置图片的指定大小
@@ -235,6 +240,7 @@ namespace PDFQFZ
                                 image.SetAbsolutePosition(psize.Width - imageW, (psize.Height - imageH) * (100 - qfzwzbl) / 100);
                             }
                             waterMarkContent.AddImage(image);
+                            waterMarkContent.RestoreState();
                         }
                         startpage += tmp;
                     }
@@ -264,6 +270,11 @@ namespace PDFQFZ
                         iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(i);//获取当前页尺寸
                         iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(ModelPicName);//创建一个图片对象
                         img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+                        waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
+                        PdfGState state = new PdfGState();
+                        state.FillOpacity = tmd;
+                        waterMarkContent.SetGState(state);
+
                         float sfbl, imgW, imgH;
                         if (sftype == 0)
                         {
@@ -295,6 +306,7 @@ namespace PDFQFZ
                             img.SetAbsolutePosition((psize.Width - imgW) * wbl, (psize.Height - imgH) * hbl);
                         }
                         waterMarkContent.AddImage(img);
+                        waterMarkContent.RestoreState();
 
                         ////开始增加文本
                         //waterMarkContent.BeginText();
