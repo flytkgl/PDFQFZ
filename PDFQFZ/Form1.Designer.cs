@@ -57,12 +57,17 @@
             this.textWzbl = new System.Windows.Forms.TextBox();
             this.comboType = new System.Windows.Forms.ComboBox();
             this.comboQfz = new System.Windows.Forms.ComboBox();
+            this.comboQmtype = new System.Windows.Forms.ComboBox();
+            this.textname = new System.Windows.Forms.TextBox();
+            this.labelname = new System.Windows.Forms.Label();
+            this.textpass = new System.Windows.Forms.TextBox();
+            this.labelpass = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // bt_gz
             // 
-            this.bt_gz.Location = new System.Drawing.Point(299, 171);
+            this.bt_gz.Location = new System.Drawing.Point(299, 198);
             this.bt_gz.Name = "bt_gz";
             this.bt_gz.Size = new System.Drawing.Size(65, 23);
             this.bt_gz.TabIndex = 0;
@@ -153,19 +158,19 @@
             // 
             // log
             // 
-            this.log.Location = new System.Drawing.Point(12, 199);
+            this.log.Location = new System.Drawing.Point(12, 226);
             this.log.Multiline = true;
             this.log.Name = "log";
             this.log.ReadOnly = true;
             this.log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.log.Size = new System.Drawing.Size(423, 148);
+            this.log.Size = new System.Drawing.Size(423, 121);
             this.log.TabIndex = 10;
             this.log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40m" +
     "m印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可,如果想直接设置图片尺寸也是可以的,但是要注意只支持正方形的图片";
             // 
             // clear
             // 
-            this.clear.Location = new System.Drawing.Point(370, 171);
+            this.clear.Location = new System.Drawing.Point(370, 198);
             this.clear.Name = "clear";
             this.clear.Size = new System.Drawing.Size(65, 23);
             this.clear.TabIndex = 11;
@@ -237,7 +242,7 @@
             // 
             // textBili
             // 
-            this.textBili.Location = new System.Drawing.Point(96, 171);
+            this.textBili.Location = new System.Drawing.Point(96, 198);
             this.textBili.Name = "textBili";
             this.textBili.Size = new System.Drawing.Size(23, 21);
             this.textBili.TabIndex = 19;
@@ -246,7 +251,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(125, 175);
+            this.label7.Location = new System.Drawing.Point(125, 202);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(17, 12);
             this.label7.TabIndex = 20;
@@ -269,7 +274,7 @@
             this.comboBoxBL.Items.AddRange(new object[] {
             "印章比例",
             "印章尺寸"});
-            this.comboBoxBL.Location = new System.Drawing.Point(13, 172);
+            this.comboBoxBL.Location = new System.Drawing.Point(13, 199);
             this.comboBoxBL.Name = "comboBoxBL";
             this.comboBoxBL.Size = new System.Drawing.Size(74, 20);
             this.comboBoxBL.TabIndex = 22;
@@ -278,7 +283,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(157, 176);
+            this.label6.Location = new System.Drawing.Point(157, 203);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(65, 12);
             this.label6.TabIndex = 23;
@@ -287,7 +292,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(255, 176);
+            this.label8.Location = new System.Drawing.Point(255, 203);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(11, 12);
             this.label8.TabIndex = 25;
@@ -295,7 +300,7 @@
             // 
             // textWzbl
             // 
-            this.textWzbl.Location = new System.Drawing.Point(226, 172);
+            this.textWzbl.Location = new System.Drawing.Point(226, 199);
             this.textWzbl.Name = "textWzbl";
             this.textWzbl.Size = new System.Drawing.Size(23, 21);
             this.textWzbl.TabIndex = 24;
@@ -326,11 +331,65 @@
             this.comboQfz.Size = new System.Drawing.Size(145, 20);
             this.comboQfz.TabIndex = 27;
             // 
+            // comboQmtype
+            // 
+            this.comboQmtype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboQmtype.FormattingEnabled = true;
+            this.comboQmtype.Items.AddRange(new object[] {
+            "不使用数字签名",
+            "自生成证书签名",
+            "自定义证书签名"});
+            this.comboQmtype.Location = new System.Drawing.Point(12, 173);
+            this.comboQmtype.Name = "comboQmtype";
+            this.comboQmtype.Size = new System.Drawing.Size(111, 20);
+            this.comboQmtype.TabIndex = 28;
+            this.comboQmtype.SelectionChangeCommitted += new System.EventHandler(this.comboQmtype_SelectionChangeCommitted);
+            // 
+            // textname
+            // 
+            this.textname.Location = new System.Drawing.Point(164, 172);
+            this.textname.Name = "textname";
+            this.textname.ReadOnly = true;
+            this.textname.Size = new System.Drawing.Size(110, 21);
+            this.textname.TabIndex = 30;
+            // 
+            // labelname
+            // 
+            this.labelname.AutoSize = true;
+            this.labelname.Location = new System.Drawing.Point(129, 176);
+            this.labelname.Name = "labelname";
+            this.labelname.Size = new System.Drawing.Size(29, 12);
+            this.labelname.TabIndex = 29;
+            this.labelname.Text = "签名";
+            // 
+            // textpass
+            // 
+            this.textpass.Location = new System.Drawing.Point(315, 172);
+            this.textpass.Name = "textpass";
+            this.textpass.PasswordChar = '*';
+            this.textpass.ReadOnly = true;
+            this.textpass.Size = new System.Drawing.Size(120, 21);
+            this.textpass.TabIndex = 32;
+            // 
+            // labelpass
+            // 
+            this.labelpass.AutoSize = true;
+            this.labelpass.Location = new System.Drawing.Point(280, 176);
+            this.labelpass.Name = "labelpass";
+            this.labelpass.Size = new System.Drawing.Size(29, 12);
+            this.labelpass.TabIndex = 31;
+            this.labelpass.Text = "密码";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.textpass);
+            this.Controls.Add(this.labelpass);
+            this.Controls.Add(this.textname);
+            this.Controls.Add(this.labelname);
+            this.Controls.Add(this.comboQmtype);
             this.Controls.Add(this.comboQfz);
             this.Controls.Add(this.comboType);
             this.Controls.Add(this.label8);
@@ -400,6 +459,11 @@
         private System.Windows.Forms.TextBox textWzbl;
         private System.Windows.Forms.ComboBox comboType;
         private System.Windows.Forms.ComboBox comboQfz;
+        private System.Windows.Forms.ComboBox comboQmtype;
+        private System.Windows.Forms.TextBox textname;
+        private System.Windows.Forms.Label labelname;
+        private System.Windows.Forms.TextBox textpass;
+        private System.Windows.Forms.Label labelpass;
     }
 }
 

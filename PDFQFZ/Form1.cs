@@ -15,12 +15,15 @@ using iTextSharp.text.pdf.security;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.Crypto.Parameters;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace PDFQFZ
 {
     public partial class Form1 : Form
     {
         int fw, fh;
+        string certPath = $@"{Application.StartupPath}\pdfqfz.pfx";//默认证书存放地址
         System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)//把DLL打包到EXE需要用到
         {
             string dllName = args.Name.Contains(",") ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name.Replace(".dll", "");
@@ -172,8 +175,13 @@ namespace PDFQFZ
             float.TryParse(textWzbl.Text, out qfzwzbl);//骑缝章位置比例
             float picbl = 1.003f;//别问我这个数值怎么来的
             float picmm = 2.842f;//别问我这个数值怎么来的
-            float tmd = 0.6f;//印章图片整体透明度
-            bool isSign = false;//是否数字签名
+            int signtype = comboQmtype.SelectedIndex; ;//是否数字签名
+            string name = textname.Text;//签名或证书
+            string password = textpass.Text;//证书密码
+            Pkcs12Store store=null;//证书集
+
+            PdfGState state = new PdfGState();
+            state.FillOpacity = 0.6f;//印章图片整体透明度
 
             //throw new NotImplementedException();
             PdfReader pdfReader = null;
@@ -181,8 +189,40 @@ namespace PDFQFZ
             try
             {
                 pdfReader = new PdfReader(inputfilepath);//选择需要印章的pdf
-                if (isSign)
+                if (signtype != 0)
                 {
+                    if (signtype == 1)
+                    {
+                        //如果证书不存在就先生成证书
+                        if (!File.Exists(certPath))
+                        {
+                            var ecdsa = RSA.Create(4096); // generate asymmetric key pair
+                            var req = new CertificateRequest("CN="+ name, ecdsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                            var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
+
+                            // Create PFX (PKCS #12) with private key
+                            File.WriteAllBytes(certPath, cert.Export(X509ContentType.Pkcs12, password));
+
+                            // Create Base 64 encoded CER (public key only)
+                            //File.WriteAllText("D:\\mycert.cer","-----BEGIN CERTIFICATE-----\r\n" + Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks) + "\r\n-----END CERTIFICATE-----");
+
+                        }
+                    }
+                    else
+                    {
+                        certPath = name;//自定义证书路径
+                    }
+
+                    try
+                    {
+                        store = new Pkcs12Store(new FileStream(certPath, FileMode.Open, FileAccess.Read), password.ToCharArray());
+                    }
+                    catch
+                    {
+                        MessageBox.Show("证书加载失败,请检查证书路径和密码");
+                        return false;
+                    }
+                    
                     pdfStamper = PdfStamper.CreateSignature(pdfReader, new FileStream(outputfilepath, FileMode.Create), '\0', null, true);//加完印章后的pdf
                 }
                 else
@@ -193,6 +233,7 @@ namespace PDFQFZ
                 int numberOfPages = pdfReader.NumberOfPages;//pdf页数
                 
                 PdfContentByte waterMarkContent;
+
                 if(zqfz == 0&& numberOfPages > 1)
                 {
                     int max = 20;//骑缝章最大分割数
@@ -220,8 +261,6 @@ namespace PDFQFZ
                             iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[x - 1], ImageFormat.Bmp);//获取骑缝章对应页的部分
                             image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
                             waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
-                            PdfGState state = new PdfGState();
-                            state.FillOpacity = tmd;
                             waterMarkContent.SetGState(state);
                             //image.GrayFill = 20;//透明度，灰色填充
                             //image.Rotation//旋转
@@ -264,124 +303,166 @@ namespace PDFQFZ
                     }
                 }
 
-                bool all = false;
-                int index = 0;
-                if (zyz == 1)
+                if (zyz!=0||signtype!=0)
                 {
-                    index = numberOfPages;
-                }
-                else if (zyz == 2)
-                {
-                    index = 1;
-                }
-                else if (zyz == 3)
-                {
-                    all = true;
-                }
-
-                for (int i = 1; i <= numberOfPages; i++)
-                {
-                    if (all || i == index)
+                    float sfbl, imgW=0, imgH=0;
+                    float xPos=0, yPos=0;
+                    bool all = false;
+                    int signpage = 0;
+                    if (zyz == 1)
                     {
-                        waterMarkContent = pdfStamper.GetOverContent(i);//获取当前页内容
-                        int rotation = pdfReader.GetPageRotation(i);//获取指定页面的旋转度
-                        iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(i);//获取当前页尺寸
-                        iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(ModelPicName);//创建一个图片对象
-                        img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
-                        waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
-                        PdfGState state = new PdfGState();
-                        state.FillOpacity = tmd;
-                        waterMarkContent.SetGState(state);
+                        signpage = numberOfPages;
+                    }
+                    else if (zyz == 2)
+                    {
+                        signpage = 1;
+                    }
+                    else if (zyz == 3)
+                    {
+                        signpage = numberOfPages;
+                        all = true;
+                    }
 
-                        float sfbl, imgW, imgH;
-                        if (sftype == 0)
+                    iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(ModelPicName);//创建一个图片对象
+                    img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+
+                    for (int i = 1; i <= numberOfPages; i++)
+                    {
+                        if (all || i == signpage)
                         {
-                            sfbl = sfsize * picbl;//别问我为什么要乘这个
-                            imgW = img.Width * sfbl / 100f;
-                            imgH = img.Height * sfbl / 100f;
-                            //img.ScalePercent(sfbl);//设置图片比例
-                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小
-                        }
-                        else
-                        {
-                            sfbl = sfsize * picmm;//别问我为什么要乘这个
-                            imgW = sfbl;
-                            imgH = sfbl;
-                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小
-                        }
+                            waterMarkContent = pdfStamper.GetOverContent(i);//获取当前页内容
+                            int rotation = pdfReader.GetPageRotation(i);//获取指定页面的旋转度
+                            iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(i);//获取当前页尺寸
 
-                        //把图片增加到内容页的指定位子  b width c height  e bottom f left
-                        //waterMarkContent.AddImage(img,0,100f,100f,0,10f,20f);
+                            waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
+                            
+                            waterMarkContent.SetGState(state);
 
-                        float xPos,yPos;
-                        float wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
-                        float hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
-                        if (rotation == 90 || rotation == 270)
-                        {
-                            xPos = (psize.Height - imgW) * wbl;
-                            yPos = (psize.Width - imgH) * hbl;
-                        }
-                        else
-                        {
-                            xPos = (psize.Width - imgW) * wbl;
-                            yPos = (psize.Height - imgH) * hbl;
-                        }
-                        img.SetAbsolutePosition(xPos,yPos);
-                        waterMarkContent.AddImage(img);
-                        waterMarkContent.RestoreState();
-
-                        ////开始增加文本
-                        //waterMarkContent.BeginText();
-
-                        //BaseFont bf = BaseFont.CreateFont(BaseFont.HELVETICA_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-                        ////设置字体 大小
-                        //waterMarkContent.SetFontAndSize(bf, 9);
-
-                        ////指定添加文字的绝对位置
-                        //waterMarkContent.SetTextMatrix(imgLeft, 200);
-                        ////增加文本
-                        //waterMarkContent.ShowText("GW INDUSTRIAL LTD");
-
-                        ////结束
-                        //waterMarkContent.EndText();
-
-
-                        //最后一页加数字签名
-                        if(isSign&&i == numberOfPages)
-                        {
-                            string alias = null;
-                            Pkcs12Store store;
-
-                            string certPath = "D:\\pdfqfz.pfx";//证书路径
-                            string password = "PDFQFZ";//私钥密码
-                            store = new Pkcs12Store(new FileStream(certPath, FileMode.Open, FileAccess.Read), password.ToCharArray());
-
-                            foreach (string al in store.Aliases)
+                            
+                            if (sftype == 0)
                             {
-                                if (store.IsKeyEntry(al) && store.GetKey(al).Key.IsPrivate)
-                                {
-                                    alias = al;
-                                    break;
-                                }
+                                sfbl = sfsize * picbl;//别问我为什么要乘这个
+                                imgW = img.Width * sfbl / 100f;
+                                imgH = img.Height * sfbl / 100f;
+                                //img.ScalePercent(sfbl);//设置图片比例
+                                img.ScaleToFit(imgW, imgH);//设置图片的指定大小
+                            }
+                            else
+                            {
+                                sfbl = sfsize * picmm;//别问我为什么要乘这个
+                                imgW = sfbl;
+                                imgH = sfbl;
+                                img.ScaleToFit(imgW, imgH);//设置图片的指定大小
                             }
 
-                            var pk = store.GetKey(alias);
-                            ICollection<Org.BouncyCastle.X509.X509Certificate> chain = store.GetCertificateChain(alias).Select(c => c.Certificate).ToList();
-                            var parameters = pk.Key as RsaPrivateCrtKeyParameters;
-                            IExternalSignature externalSignature = new PrivateKeySignature(parameters, DigestAlgorithms.SHA256);
-                            PdfSignatureAppearance signatureAppearance = pdfStamper.SignatureAppearance;
-                            signatureAppearance.SignDate = DateTime.Now;
-                            //signatureAppearance.SignatureCreator = "pdfqfz";
-                            //signatureAppearance.Reason = "验证身份";
-                            //signatureAppearance.Location = "深圳";
-                            //signatureAppearance.SignatureGraphic = img;//iTextSharp.text.Image.GetInstance(ModelPicName);
-                            //signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC;
-                            //signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(xPos, yPos, xPos + imgW, yPos + imgH), i, "Signature");
-                            signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(0,0,0,0), i, null);
+                            //把图片增加到内容页的指定位子  b width c height  e bottom f left
+                            //waterMarkContent.AddImage(img,0,100f,100f,0,10f,20f);
 
-                            MakeSignature.SignDetached(signatureAppearance, externalSignature, chain, null, null, null, 0, CryptoStandard.CMS);
+                            
+                            float wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
+                            float hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
+                            if (rotation == 90 || rotation == 270)
+                            {
+                                xPos = (psize.Height - imgW) * wbl;
+                                yPos = (psize.Width - imgH) * hbl;
+                            }
+                            else
+                            {
+                                xPos = (psize.Width - imgW) * wbl;
+                                yPos = (psize.Height - imgH) * hbl;
+                            }
+
+                            //同时启用印章和数字签名的话用最后一个印章用数字签名代替
+                            if (all)
+                            {
+                                if (signtype==0)
+                                {
+                                    //所有页要盖章,并且不是数字签名
+                                    img.SetAbsolutePosition(xPos, yPos);
+                                    waterMarkContent.AddImage(img);
+                                    waterMarkContent.RestoreState();
+                                }
+                                else if (i != numberOfPages)
+                                {
+                                    //所有页要盖章,要数字签名,但是不是最后一页
+                                    img.SetAbsolutePosition(xPos, yPos);
+                                    waterMarkContent.AddImage(img);
+                                    waterMarkContent.RestoreState();
+                                }
+                            }
+                            else if (signtype == 0)
+                            {
+                                //只有首页或尾页要盖章,并且不是数字签名
+                                img.SetAbsolutePosition(xPos, yPos);
+                                waterMarkContent.AddImage(img);
+                                waterMarkContent.RestoreState();
+                            }
+
+
+                            ////开始增加文本
+                            //waterMarkContent.BeginText();
+
+                            //BaseFont bf = BaseFont.CreateFont(BaseFont.HELVETICA_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                            ////设置字体 大小
+                            //waterMarkContent.SetFontAndSize(bf, 9);
+
+                            ////指定添加文字的绝对位置
+                            //waterMarkContent.SetTextMatrix(imgLeft, 200);
+                            ////增加文本
+                            //waterMarkContent.ShowText("GW INDUSTRIAL LTD");
+
+                            ////结束
+                            //waterMarkContent.EndText();
+
+
+                            //如果不是所有页都盖章,那对应页盖完后直接跳出循环
+                            if (!all&&i == signpage)
+                            {
+                                break;
+                            }
+
                         }
                     }
+
+                    //加数字签名
+                    if (signtype != 0)
+                    {
+                        string alias = null;
+                        
+
+                        foreach (string al in store.Aliases)
+                        {
+                            if (store.IsKeyEntry(al) && store.GetKey(al).Key.IsPrivate)
+                            {
+                                alias = al;
+                                break;
+                            }
+                        }
+
+                        var pk = store.GetKey(alias);
+                        ICollection<Org.BouncyCastle.X509.X509Certificate> chain = store.GetCertificateChain(alias).Select(c => c.Certificate).ToList();
+                        var parameters = pk.Key as RsaPrivateCrtKeyParameters;
+                        IExternalSignature externalSignature = new PrivateKeySignature(parameters, DigestAlgorithms.SHA256);
+
+                        PdfSignatureAppearance signatureAppearance = pdfStamper.SignatureAppearance;
+                        signatureAppearance.SignDate = DateTime.Now;
+                        signatureAppearance.SignatureCreator = name;
+                        //signatureAppearance.Reason = "验证身份";
+                        //signatureAppearance.Location = "深圳";
+                        signatureAppearance.SignatureGraphic = img;//iTextSharp.text.Image.GetInstance(ModelPicName);
+                        signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC;
+                        if (zyz == 0)
+                        {
+                            signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(0, 0, 0, 0), numberOfPages, null);
+                        }
+                        else
+                        {
+                            signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(xPos, yPos, xPos + imgW, yPos + imgH), signpage, "Signature");
+                        }
+
+                        MakeSignature.SignDetached(signatureAppearance, externalSignature, chain, null, null, null, 0, CryptoStandard.CMS);
+                    }
+
                 }
                 return true;
             }
@@ -466,6 +547,7 @@ namespace PDFQFZ
             comboQfz.SelectedIndex = 0;
             comboYz.SelectedIndex = 0;
             comboBoxBL.SelectedIndex = 1;
+            comboQmtype.SelectedIndex = 0;
             fw = this.Width;
             fh = this.Height;
         }
@@ -534,6 +616,60 @@ namespace PDFQFZ
             {
                 label1.Text = "请选择需要盖章的PDF文件(支持多选)";
                 label2.Text = "请选择PDF盖章后所保存的目录";
+            }
+            
+        }
+
+        private void comboQmtype_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            if (comboQmtype.SelectedIndex == 0)
+            {
+                labelname.Text = "签名";
+                textname.Text = "";
+                textpass.Text = "";
+                textname.ReadOnly = true;
+                textpass.ReadOnly = true;
+            }
+            else if (comboQmtype.SelectedIndex == 1)
+            {
+                
+                textpass.Text = "";
+                if (!File.Exists(certPath))
+                {
+                    labelname.Text = "签名";
+                    textname.Text = "";
+                    textname.ReadOnly = false;
+                }
+                else
+                {
+                    labelname.Text = "证书";
+                    textname.Text = certPath;
+                    textname.ReadOnly = true;
+                }
+                    
+                textpass.ReadOnly = false;
+            }
+            else
+            {
+                labelname.Text = "证书";
+                textname.Text = "";
+                textpass.Text = "";
+                textname.ReadOnly = true;
+                textpass.ReadOnly = false;
+
+                OpenFileDialog file = new OpenFileDialog();
+                file.Filter = "证书文件|*.pfx";
+                if (file.ShowDialog() == DialogResult.OK)
+                {
+                    textname.Text = file.FileName;
+                }
+                else
+                {
+                    comboQmtype.SelectedIndex = 0;
+                    labelname.Text = "签名";
+                    textname.ReadOnly = true;
+                    textpass.ReadOnly = true;
+                }
             }
             
         }
