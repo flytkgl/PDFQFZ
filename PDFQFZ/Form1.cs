@@ -43,9 +43,9 @@ namespace PDFQFZ
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if(comboQfz.SelectedIndex == 1&&comboYz.SelectedIndex == 0)
+            if(comboQfz.SelectedIndex == 1&&comboYz.SelectedIndex == 0 && comboQmtype.SelectedIndex == 0)
             {
-                if (MessageBox.Show("你既不盖骑缝章又不盖印章是想让我帮你关机吗?","你想干嘛", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
+                if (MessageBox.Show("你既不盖骑缝章又不盖印章还不要我签名是想让我帮你关机吗?","你想干嘛", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
                 {
                     MessageBox.Show("滚蛋吧,我才不帮你关呢,哼!");
                     System.Environment.Exit(0);
@@ -53,7 +53,7 @@ namespace PDFQFZ
             }
             else
             {
-                if (textGZpath.Text != "" && textBCpath.Text != "" && pathText.Text != "")
+                if (pathText.Text != "" && textBCpath.Text != "" && (textGZpath.Text != "" || comboQfz.SelectedIndex==1 && comboYz.SelectedIndex==0))
                 {
                     float res;
                     if (!float.TryParse(textBili.Text, out res) || (comboBoxBL.SelectedIndex == 0 && res > 100.00f))
@@ -305,10 +305,34 @@ namespace PDFQFZ
 
                 if (zyz!=0||signtype!=0)
                 {
+                    iTextSharp.text.Image img = null;
                     float sfbl, imgW=0, imgH=0;
                     float xPos=0, yPos=0;
                     bool all = false;
                     int signpage = 0;
+
+                    if (zyz != 0)
+                    {
+                        img = iTextSharp.text.Image.GetInstance(ModelPicName);//创建一个图片对象
+                        img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+
+                        if (sftype == 0)
+                        {
+                            sfbl = sfsize * picbl;//别问我为什么要乘这个
+                            imgW = img.Width * sfbl / 100f;
+                            imgH = img.Height * sfbl / 100f;
+                            //img.ScalePercent(sfbl);//设置图片比例
+                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小
+                        }
+                        else
+                        {
+                            sfbl = sfsize * picmm;//别问我为什么要乘这个
+                            imgW = sfbl;
+                            imgH = sfbl;
+                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小
+                        }
+                    }
+
                     if (zyz == 1)
                     {
                         signpage = numberOfPages;
@@ -323,9 +347,6 @@ namespace PDFQFZ
                         all = true;
                     }
 
-                    iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(ModelPicName);//创建一个图片对象
-                    img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
-
                     for (int i = 1; i <= numberOfPages; i++)
                     {
                         if (all || i == signpage)
@@ -335,30 +356,8 @@ namespace PDFQFZ
                             iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(i);//获取当前页尺寸
 
                             waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
-                            
                             waterMarkContent.SetGState(state);
 
-                            
-                            if (sftype == 0)
-                            {
-                                sfbl = sfsize * picbl;//别问我为什么要乘这个
-                                imgW = img.Width * sfbl / 100f;
-                                imgH = img.Height * sfbl / 100f;
-                                //img.ScalePercent(sfbl);//设置图片比例
-                                img.ScaleToFit(imgW, imgH);//设置图片的指定大小
-                            }
-                            else
-                            {
-                                sfbl = sfsize * picmm;//别问我为什么要乘这个
-                                imgW = sfbl;
-                                imgH = sfbl;
-                                img.ScaleToFit(imgW, imgH);//设置图片的指定大小
-                            }
-
-                            //把图片增加到内容页的指定位子  b width c height  e bottom f left
-                            //waterMarkContent.AddImage(img,0,100f,100f,0,10f,20f);
-
-                            
                             float wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
                             float hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
                             if (rotation == 90 || rotation == 270)
@@ -429,7 +428,6 @@ namespace PDFQFZ
                     {
                         string alias = null;
                         
-
                         foreach (string al in store.Aliases)
                         {
                             if (store.IsKeyEntry(al) && store.GetKey(al).Key.IsPrivate)
@@ -449,7 +447,6 @@ namespace PDFQFZ
                         signatureAppearance.SignatureCreator = name;
                         //signatureAppearance.Reason = "验证身份";
                         //signatureAppearance.Location = "深圳";
-                        signatureAppearance.SignatureGraphic = img;//iTextSharp.text.Image.GetInstance(ModelPicName);
                         signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC;
                         if (zyz == 0)
                         {
@@ -457,6 +454,7 @@ namespace PDFQFZ
                         }
                         else
                         {
+                            signatureAppearance.SignatureGraphic = img;//iTextSharp.text.Image.GetInstance(ModelPicName);
                             signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(xPos, yPos, xPos + imgW, yPos + imgH), signpage, "Signature");
                         }
 
