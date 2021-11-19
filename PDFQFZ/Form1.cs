@@ -23,7 +23,7 @@ namespace PDFQFZ
     public partial class Form1 : Form
     {
         int fw, fh;
-        string certPath = $@"{Application.StartupPath}\pdfqfz.pfx";//默认证书存放地址
+        string certDefaultPath = $@"{Application.StartupPath}\pdfqfz.pfx";//证书默认存放地址
         System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)//把DLL打包到EXE需要用到
         {
             string dllName = args.Name.Contains(",") ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name.Replace(".dll", "");
@@ -82,7 +82,7 @@ namespace PDFQFZ
             
             string sourcepath = pathText.Text;//需盖章目录
             string outputpath = textBCpath.Text;//保存目录
-            Pkcs12Store store = null;//证书集
+            X509Certificate2 cert = null;//证书
 
 
             if (!Directory.Exists(outputpath))//输出目录不存在则新建
@@ -97,22 +97,24 @@ namespace PDFQFZ
                 //如果要数字签名,先判断证书能否正常加载
                 if (comboQmtype.SelectedIndex!=0)
                 {
+                    string certPath = null;//证书路径
                     if (comboQmtype.SelectedIndex == 1)
                     {
                         //如果证书不存在就先生成证书
-                        if (!File.Exists(certPath))
+                        if (!File.Exists(certDefaultPath))
                         {
-                            var ecdsa = RSA.Create(4096); // generate asymmetric key pair
-                            var req = new CertificateRequest("CN=" + textname.Text, ecdsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-                            var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
+                            var rSA = RSA.Create(4096); // 生成非对称密钥对
+                            var req = new CertificateRequest("CN=" + textname.Text, rSA, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                            X509Certificate2 newCert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));//这里生成的证书经测试不能直接用,必须先保存为pfx文件再重新加载
 
                             // Create PFX (PKCS #12) with private key
-                            File.WriteAllBytes(certPath, cert.Export(X509ContentType.Pkcs12, textpass.Text));
+                            File.WriteAllBytes(certDefaultPath, newCert.Export(X509ContentType.Pkcs12, textpass.Text));//不同版本的.net Pfx跟Pksc12好像并不一样,所以直接指定成Pksc12更安全
 
                             // Create Base 64 encoded CER (public key only)
-                            //File.WriteAllText("D:\\mycert.cer","-----BEGIN CERTIFICATE-----\r\n" + Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks) + "\r\n-----END CERTIFICATE-----");
+                            //File.WriteAllText("D:\\publicKey.cer","-----BEGIN CERTIFICATE-----\r\n" + Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks) + "\r\n-----END CERTIFICATE-----");
 
                         }
+                        certPath = certDefaultPath;
                     }
                     else
                     {
@@ -121,7 +123,7 @@ namespace PDFQFZ
 
                     try
                     {
-                        store = new Pkcs12Store(new FileStream(certPath, FileMode.Open, FileAccess.Read), textpass.Text.ToCharArray());
+                        cert = new X509Certificate2(certPath, textpass.Text, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);//注意设置第三个参数,不然有权限问题
                     }
                     catch
                     {
@@ -141,7 +143,7 @@ namespace PDFQFZ
                         {
                             string source = sourcepath + "\\" + fileInfo.Name;
                             string output = outputpath + "\\" + fileInfo.Name;
-                            bool isSurrcess = PDFWatermark(source, output, store);
+                            bool isSurrcess = PDFWatermark(source, output, cert);
                             if (isSurrcess)
                             {
                                 log.Text = log.Text + "成功！“" + fileInfo.Name + "”盖章完成！\r\n";
@@ -165,7 +167,7 @@ namespace PDFQFZ
                             output = outputpath + "\\" + System.IO.Path.GetFileNameWithoutExtension(file) + "_QFZ.pdf";//如果跟源文件在同一个目录需要重命名
                         }
                         string source = file;
-                        bool isSurrcess = PDFWatermark(source, output, store);
+                        bool isSurrcess = PDFWatermark(source, output, cert);
                         if (isSurrcess)
                         {
                             log.Text = log.Text + "成功！“" + filename + "”盖章完成！\r\n";
@@ -203,7 +205,7 @@ namespace PDFQFZ
             return nImage;
         }
 
-        private bool PDFWatermark(string inputfilepath, string outputfilepath, Pkcs12Store store)
+        private bool PDFWatermark(string inputfilepath, string outputfilepath, X509Certificate2 cert)
         {
             string ModelPicName = textGZpath.Text;//印章文件路径
             int zyz = comboYz.SelectedIndex;//加印章方式
@@ -226,6 +228,7 @@ namespace PDFQFZ
                 pdfReader = new PdfReader(inputfilepath);//选择需要印章的pdf
                 if (comboQmtype.SelectedIndex != 0)
                 {
+                    //最后的true表示保留原签名
                     pdfStamper = PdfStamper.CreateSignature(pdfReader, new FileStream(outputfilepath, FileMode.Create), '\0', null, true);//加完印章后的pdf
                 }
                 else
@@ -331,8 +334,8 @@ namespace PDFQFZ
                         {
                             sfbl = sfsize * picmm;//别问我为什么要乘这个
                             imgW = sfbl;
-                            imgH = sfbl;
-                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小
+                            imgH = sfbl* img.Height/ img.Width;
+                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小,实际只能指定宽度,高度还是按照图片比例计算的
                         }
                     }
 
@@ -373,32 +376,34 @@ namespace PDFQFZ
                                 xPos = (psize.Width - imgW) * wbl;
                                 yPos = (psize.Height - imgH) * hbl;
                             }
+                            img.SetAbsolutePosition(xPos, yPos);
+                            waterMarkContent.AddImage(img);
+                            waterMarkContent.RestoreState();
 
+                            //普通印章跟数字印章已经完美重叠,所以就不需要通过以下方法特殊区分了
                             //同时启用印章和数字签名的话用最后一个印章用数字签名代替
-                            if (all)
-                            {
-                                if (comboQmtype.SelectedIndex == 0)
-                                {
-                                    //所有页要盖章,并且不是数字签名
-                                    img.SetAbsolutePosition(xPos, yPos);
-                                    waterMarkContent.AddImage(img);
-                                    waterMarkContent.RestoreState();
-                                }
-                                else if (i != numberOfPages)
-                                {
-                                    //所有页要盖章,要数字签名,但是不是最后一页
-                                    img.SetAbsolutePosition(xPos, yPos);
-                                    waterMarkContent.AddImage(img);
-                                    waterMarkContent.RestoreState();
-                                }
-                            }
-                            else if (comboQmtype.SelectedIndex == 0)
-                            {
-                                //只有首页或尾页要盖章,并且不是数字签名
-                                img.SetAbsolutePosition(xPos, yPos);
-                                waterMarkContent.AddImage(img);
-                                waterMarkContent.RestoreState();
-                            }
+                            //if (all)
+                            //{
+                            //    if (comboQmtype.SelectedIndex == 0)
+                            //    {
+                            //        //所有页要盖章,并且不是数字签名
+
+                            //        waterMarkContent.AddImage(img);
+                            //        waterMarkContent.RestoreState();
+                            //    }
+                            //    else if (i != numberOfPages)
+                            //    {
+                            //        //所有页要盖章,要数字签名,但是不是最后一页
+                            //        waterMarkContent.AddImage(img);
+                            //        waterMarkContent.RestoreState();
+                            //    }
+                            //}
+                            //else if (comboQmtype.SelectedIndex == 0)
+                            //{
+                            //    //只有首页或尾页要盖章,并且不是数字签名
+                            //    waterMarkContent.AddImage(img);
+                            //    waterMarkContent.RestoreState();
+                            //}
 
 
                             ////开始增加文本
@@ -429,36 +434,36 @@ namespace PDFQFZ
                     //加数字签名
                     if (comboQmtype.SelectedIndex != 0)
                     {
-                        string alias = null;
-                        
-                        foreach (string al in store.Aliases)
-                        {
-                            if (store.IsKeyEntry(al) && store.GetKey(al).Key.IsPrivate)
-                            {
-                                alias = al;
-                                break;
-                            }
-                        }
 
-                        var pk = store.GetKey(alias);
-                        ICollection<Org.BouncyCastle.X509.X509Certificate> chain = store.GetCertificateChain(alias).Select(c => c.Certificate).ToList();
-                        var parameters = pk.Key as RsaPrivateCrtKeyParameters;
-                        IExternalSignature externalSignature = new PrivateKeySignature(parameters, DigestAlgorithms.SHA256);
+                        Org.BouncyCastle.X509.X509CertificateParser cp = new Org.BouncyCastle.X509.X509CertificateParser();
+                        Org.BouncyCastle.X509.X509Certificate[] chain = new Org.BouncyCastle.X509.X509Certificate[] {cp.ReadCertificate(cert.RawData)};
+                        IExternalSignature externalSignature = new X509Certificate2Signature(cert, DigestAlgorithms.SHA1);
 
                         PdfSignatureAppearance signatureAppearance = pdfStamper.SignatureAppearance;
                         signatureAppearance.SignDate = DateTime.Now;
                         //signatureAppearance.SignatureCreator = "";
                         //signatureAppearance.Reason = "验证身份";
                         //signatureAppearance.Location = "深圳";
-                        signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC;
                         if (zyz == 0)
                         {
                             signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(0, 0, 0, 0), numberOfPages, null);
                         }
                         else
                         {
+                            signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC;//仅体现图片
                             signatureAppearance.SignatureGraphic = img;//iTextSharp.text.Image.GetInstance(ModelPicName);
-                            signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(xPos, yPos, xPos + imgW, yPos + imgH), signpage, "Signature");
+                            //signatureAppearance.Acro6Layers = true;
+
+                            //StringBuilder buf = new StringBuilder();
+                            //buf.Append("Digitally Signed by ");
+                            //String name = cert.SubjectName.Name;
+                            //buf.Append(name).Append('\n');
+                            //buf.Append("Date: ").Append(DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss zzz"));
+                            //string text = buf.ToString();
+                            //signatureAppearance.Layer2Text = text;
+
+                            float bk = 2;//数字签名的图片要加上边框才能跟普通印章的位置完全一致
+                            signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(xPos- bk, yPos- bk, xPos + imgW + bk, yPos + imgH + bk), signpage, "Signature");
                         }
 
                         MakeSignature.SignDetached(signatureAppearance, externalSignature, chain, null, null, null, 0, CryptoStandard.CMS);
@@ -469,7 +474,7 @@ namespace PDFQFZ
             }
             catch (Exception ex)
             {
-                ex.Message.Trim();
+                MessageBox.Show(ex.ToString());
                 return false;
             }
             finally
@@ -635,7 +640,7 @@ namespace PDFQFZ
             {
                 
                 textpass.Text = "";
-                if (!File.Exists(certPath))
+                if (!File.Exists(certDefaultPath))
                 {
                     labelname.Text = "签名";
                     textname.Text = "";
@@ -644,7 +649,7 @@ namespace PDFQFZ
                 else
                 {
                     labelname.Text = "证书";
-                    textname.Text = certPath;
+                    textname.Text = certDefaultPath;
                     textname.ReadOnly = true;
                 }
                     
