@@ -17,13 +17,21 @@ using Org.BouncyCastle.X509;
 using Org.BouncyCastle.Crypto.Parameters;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using O2S.Components.PDFRender4NET;
 
 namespace PDFQFZ
 {
     public partial class Form1 : Form
     {
-        int fw, fh;
+        int fw, fh,imgStartPage=0, imgPageCount=0;
         string certDefaultPath = $@"{Application.StartupPath}\pdfqfz.pfx";//证书默认存放地址
+        DataTable dt = new DataTable();//PDF列表
+        DataTable dtPos = new DataTable();//PDF各文件印章位置表
+        string pdfInputPath = null;//选中的PDF文件路径
+
+
+
+
         System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)//把DLL打包到EXE需要用到
         {
             string dllName = args.Name.Contains(",") ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name.Replace(".dll", "");
@@ -139,7 +147,7 @@ namespace PDFQFZ
                     var fileInfos = dir.GetFiles();
                     foreach (var fileInfo in fileInfos)
                     {
-                        if(fileInfo.Extension == "pdf")
+                        if(fileInfo.Extension == ".pdf")
                         {
                             string source = sourcepath + "\\" + fileInfo.Name;
                             string output = outputpath + "\\" + fileInfo.Name;
@@ -185,7 +193,7 @@ namespace PDFQFZ
                 MessageBox.Show(ex.ToString());
             }
         }
-
+        //分割图片
         private static Bitmap[] subImages(String imgPath, int n)//图片分割
         {
             Bitmap[] nImage = new Bitmap[n];
@@ -204,7 +212,7 @@ namespace PDFQFZ
             }
             return nImage;
         }
-
+        //PDF盖章
         private bool PDFWatermark(string inputfilepath, string outputfilepath, X509Certificate2 cert)
         {
             string ModelPicName = textGZpath.Text;//印章文件路径
@@ -364,8 +372,20 @@ namespace PDFQFZ
                             waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
                             waterMarkContent.SetGState(state);
 
-                            float wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
-                            float hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
+                            float wbl = 0;
+                            float hbl = 1;
+                            DataRow[] arrRow = dtPos.Select("Path = '" + inputfilepath + "' and Page = " + i);
+                            if (arrRow == null || arrRow.Length == 0)
+                            {
+                                wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
+                                hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
+                            }
+                            else
+                            {
+                                DataRow dr = arrRow[0];
+                                wbl = Convert.ToSingle(dr["X"].ToString());
+                                hbl = 1 - Convert.ToSingle(dr["Y"].ToString());
+                            }
                             if (rotation == 90 || rotation == 270)
                             {
                                 xPos = (psize.Height - imgW) * wbl;
@@ -488,6 +508,21 @@ namespace PDFQFZ
             }
         }
 
+        private Bitmap[] ConvertPDF2Image(string pdfInputPath)
+        {
+            PDFFile pdfFile = PDFFile.Open(pdfInputPath);
+            int pages = pdfFile.PageCount;
+            Bitmap[] nImage = new Bitmap[pages];
+
+            for (int i = 0; i < pages; i++)
+            {
+                Bitmap pageImage = pdfFile.GetPageImage(i, 56 * 10);
+                nImage[i] = pageImage;
+            }
+            pdfFile.Dispose();
+            return nImage;
+        }
+        //选择源文件
         private void SelectPath_Click(object sender, EventArgs e)
         {
             if (comboType.SelectedIndex == 0)
@@ -499,6 +534,17 @@ namespace PDFQFZ
                     if (textBCpath.Text == "")
                     {
                         textBCpath.Text = fbd.SelectedPath + "\\QFZ";
+                    }
+                    dt.Rows.Clear();
+                    dt.Rows.Add(new object[] { "", "" });
+                    DirectoryInfo dir = new DirectoryInfo(pathText.Text);
+                    var fileInfos = dir.GetFiles();
+                    foreach (var fileInfo in fileInfos)
+                    {
+                        if (fileInfo.Extension == ".pdf")
+                        {
+                            dt.Rows.Add(new object[] { fileInfo.Name, fileInfo.FullName });
+                        }
                     }
                 }
             }
@@ -514,10 +560,17 @@ namespace PDFQFZ
                     {
                         textBCpath.Text = Path.GetDirectoryName(file.FileName);
                     }
+                    dt.Rows.Clear();
+                    dt.Rows.Add(new object[] { "", "" });
+                    foreach (string filePath in file.FileNames)
+                    {
+                        string filename = System.IO.Path.GetFileName(filePath);//文件名
+                        dt.Rows.Add(new object[] { filename, filePath });
+                    }
                 }
             }
         }
-
+        //选择保存目录
         private void OutPath_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
@@ -527,7 +580,7 @@ namespace PDFQFZ
             }
 
         }
-
+        //选择印章图片
         private void GzPath_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog();
@@ -537,16 +590,16 @@ namespace PDFQFZ
                 textGZpath.Text = file.FileName;
             }
         }
-
+        //重置按钮
         private void clear_Click(object sender, EventArgs e)
         {
             pathText.Text = "";
             textBCpath.Text = "";
             textGZpath.Text = "";
-            log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40mm印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可,如果想直接设置图片尺寸也是可以的,但是要注意只支持正方形的图片";
+            log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40mm印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可";
 
         }
-
+        //程序加载
         private void Form1_Load(object sender, EventArgs e)
         {
             comboType.SelectedIndex = 1;
@@ -556,8 +609,17 @@ namespace PDFQFZ
             comboQmtype.SelectedIndex = 0;
             fw = this.Width;
             fh = this.Height;
+            dt.Columns.Add("Name", typeof(string));
+            dt.Columns.Add("Value", typeof(string));
+            comboPDFlist.DisplayMember = "Name";
+            comboPDFlist.ValueMember = "Value";
+            comboPDFlist.DataSource = dt;
+            dtPos.Columns.Add("Path", typeof(string));
+            dtPos.Columns.Add("Page", typeof(int));
+            dtPos.Columns.Add("X", typeof(float));
+            dtPos.Columns.Add("Y", typeof(float));
         }
-
+        //预览图定位
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             Point pt = pictureBox1.PointToClient(Control.MousePosition);
@@ -567,8 +629,24 @@ namespace PDFQFZ
             float py = pt.Y / pich;
             textPx.Text = px.ToString("#0.0000");
             textPy.Text = py.ToString("#0.0000");
+            DataRow[] arrRow = dtPos.Select("Path = '"+ pdfInputPath + "' and Page = "+ imgStartPage);
+            if (arrRow == null || arrRow.Length == 0)
+            {
+                dtPos.Rows.Add(new object[] { pdfInputPath, imgStartPage, px, py });
+            }
+            else
+            {
+                DataRow dr = arrRow[0];
+                dr.BeginEdit();
+                dr["X"] = px;
+                dr["Y"] = py;
+                dr.EndEdit();
+                dtPos.AcceptChanges();
+            }
+            
+            
         }
-
+        //印章比例类型
         private void comboBoxBL_SelectionChangeCommitted(object sender, EventArgs e)
         {
             if (comboBoxBL.SelectedIndex != 0)
@@ -582,7 +660,7 @@ namespace PDFQFZ
                 textBili.Text = "100";
             }
         }
-
+        //设置预览图按钮
         private void buttonYLT_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog();
@@ -608,12 +686,13 @@ namespace PDFQFZ
                 pictureBox1.Image = img;
             }
         }
-
+        //文件/目录模式切换
         private void comboType_SelectionChangeCommitted(object sender, EventArgs e)
         {
             pathText.Text = "";
             textBCpath.Text = "";
-            if(comboType.SelectedIndex == 0)
+            dt.Rows.Clear();
+            if (comboType.SelectedIndex == 0)
             {
                 label1.Text = "请选择需要盖章的PDF文件所在目录";
                 label2.Text = "请选择PDF盖章后所保存的目录";
@@ -625,7 +704,34 @@ namespace PDFQFZ
             }
             
         }
+        //上一页
+        private void buttonUp_Click(object sender, EventArgs e)
+        {
+            if (pdfInputPath != null&&imgStartPage > 1)
+            {
+                imgStartPage--;
+                PDFFile pdfFile = PDFFile.Open(pdfInputPath);
+                Bitmap pageImage = pdfFile.GetPageImage(imgStartPage-1, 56 * 1);
+                pictureBox1.Image = pageImage;
+                labelPage.Text = imgStartPage + "/" + imgPageCount;
 
+            }
+        }
+        //下一页
+        private void buttonNext_Click(object sender, EventArgs e)
+        {
+            if (pdfInputPath != null&&imgStartPage < imgPageCount)
+            {
+                imgStartPage++;
+                PDFFile pdfFile = PDFFile.Open(pdfInputPath);
+                Bitmap pageImage = pdfFile.GetPageImage(imgStartPage-1, 56 * 1);
+                pictureBox1.Image = pageImage;
+                labelPage.Text = imgStartPage + "/" + imgPageCount;
+
+            }
+        }
+
+        //数字签名类型
         private void comboQmtype_SelectionChangeCommitted(object sender, EventArgs e)
         {
             if (comboQmtype.SelectedIndex == 0)
@@ -679,7 +785,18 @@ namespace PDFQFZ
             }
             
         }
-
+        //选择PDF预览文件
+        private void comboPDFlist_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            pdfInputPath = comboPDFlist.SelectedValue.ToString();
+            PDFFile pdfFile = PDFFile.Open(pdfInputPath);
+            Bitmap pageImage = pdfFile.GetPageImage(0, 56 * 1);
+            pictureBox1.Image = pageImage;
+            imgStartPage = 1;
+            imgPageCount = pdfFile.PageCount;
+            labelPage.Text = imgStartPage + "/" + imgPageCount;
+        }
+        //根据印章类型切换窗口大小
         private void comboYz_SelectionChangeCommitted(object sender, EventArgs e)
         {
             if (comboYz.SelectedIndex != 0)

@@ -83,6 +83,9 @@
     <Reference Include="itextsharp, Version=5.5.13.2, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\iTextSharp.5.5.13.2\lib\itextsharp.dll</HintPath>
     </Reference>
+    <Reference Include="O2S.Components.PDFRender4NET">
+      <HintPath>D:\Downloads\O2S.Components.PDFRender4NET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Security" />
@@ -133,6 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="logo.ico" />
+    <None Include="Resources\O2S.Components.PDFRender4NET.dll" />
     <None Include="Resources\ylt.jpg" />
     <EmbeddedResource Include="Resources\itextsharp.dll" />
   </ItemGroup>
