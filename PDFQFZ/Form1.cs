@@ -508,20 +508,6 @@ namespace PDFQFZ
             }
         }
 
-        private Bitmap[] ConvertPDF2Image(string pdfInputPath)
-        {
-            PDFFile pdfFile = PDFFile.Open(pdfInputPath);
-            int pages = pdfFile.PageCount;
-            Bitmap[] nImage = new Bitmap[pages];
-
-            for (int i = 0; i < pages; i++)
-            {
-                Bitmap pageImage = pdfFile.GetPageImage(i, 56 * 10);
-                nImage[i] = pageImage;
-            }
-            pdfFile.Dispose();
-            return nImage;
-        }
         //选择源文件
         private void SelectPath_Click(object sender, EventArgs e)
         {
@@ -596,6 +582,11 @@ namespace PDFQFZ
             pathText.Text = "";
             textBCpath.Text = "";
             textGZpath.Text = "";
+            imgPageCount = 0;
+            imgStartPage = 0;
+            dt.Rows.Clear();
+            dtPos.Rows.Clear();
+            pdfInputPath = null;
             log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40mm印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可";
 
         }
