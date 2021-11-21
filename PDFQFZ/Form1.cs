@@ -1,20 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Windows.Forms;
-using iTextSharp.text;
 using iTextSharp.text.pdf;
-using iTextSharp.text.html.simpleparser;
-using System.Drawing.Imaging;
 using iTextSharp.text.pdf.security;
-using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.X509;
-using Org.BouncyCastle.Crypto.Parameters;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using O2S.Components.PDFRender4NET;
@@ -272,7 +262,7 @@ namespace PDFQFZ
                             waterMarkContent = pdfStamper.GetOverContent(page);//获取当前页内容
                             int rotation = pdfReader.GetPageRotation(page);//获取当前页的旋转度
                             iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(page);//获取当前页尺寸
-                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[x - 1], ImageFormat.Bmp);//获取骑缝章对应页的部分
+                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[x - 1], System.Drawing.Imaging.ImageFormat.Bmp);//获取骑缝章对应页的部分
                             image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
                             waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
                             waterMarkContent.SetGState(state);
@@ -660,7 +650,7 @@ namespace PDFQFZ
             file.Filter = "图片文件|*.jpg;*.png";
             if (file.ShowDialog() == DialogResult.OK)
             {
-                System.Drawing.Image img = System.Drawing.Image.FromFile(file.FileName);
+                Image img = Image.FromFile(file.FileName);
                 float imgW = img.Width;
                 float imgH = img.Height;
                 float imgBl = imgW / imgH;
@@ -829,6 +819,25 @@ namespace PDFQFZ
             imgPageCount = pdfFile.PageCount;
             pdfFile.Dispose();
             labelPage.Text = imgStartPage + "/" + imgPageCount;
+
+            float px, py;
+            DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
+            if (arrRow == null || arrRow.Length == 0)
+            {
+                px = Convert.ToSingle(textPx.Text);//这里根据比例来定位
+                py = Convert.ToSingle(textPy.Text);//这里根据比例来定位
+            }
+            else
+            {
+                DataRow dr = arrRow[0];
+                px = Convert.ToSingle(dr["X"].ToString());
+                py = Convert.ToSingle(dr["Y"].ToString());
+            }
+            int X = Convert.ToInt32(pictureBox1.Width * px);
+            int Y = Convert.ToInt32(pictureBox1.Height * py);
+            Point pt1 = pictureBox1.Location;
+
+            pictureBox2.Location = new Point(pt1.X + X - 10, pt1.Y + Y - 10);
         }
         //根据印章类型切换窗口大小
         private void comboYz_SelectionChangeCommitted(object sender, EventArgs e)
