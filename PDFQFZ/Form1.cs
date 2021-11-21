@@ -634,8 +634,10 @@ namespace PDFQFZ
                 dr.EndEdit();
                 dtPos.AcceptChanges();
             }
-            
-            
+            Point pt1 = pictureBox1.Location;
+
+            pictureBox2.Location = new Point(pt1.X+pt.X-10, pt1.Y + pt.Y - 10);
+
         }
         //印章比例类型
         private void comboBoxBL_SelectionChangeCommitted(object sender, EventArgs e)
@@ -703,8 +705,28 @@ namespace PDFQFZ
                 imgStartPage--;
                 PDFFile pdfFile = PDFFile.Open(pdfInputPath);
                 Bitmap pageImage = pdfFile.GetPageImage(imgStartPage-1, 56 * 1);
+                pdfFile.Dispose();
                 pictureBox1.Image = pageImage;
                 labelPage.Text = imgStartPage + "/" + imgPageCount;
+
+                float px, py;
+                DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
+                if (arrRow == null || arrRow.Length == 0)
+                {
+                    px = Convert.ToSingle(textPx.Text);//这里根据比例来定位
+                    py = Convert.ToSingle(textPy.Text);//这里根据比例来定位
+                }
+                else
+                {
+                    DataRow dr = arrRow[0];
+                    px = Convert.ToSingle(dr["X"].ToString());
+                    py = Convert.ToSingle(dr["Y"].ToString());
+                }
+                int X = Convert.ToInt32(pictureBox1.Width*px);
+                int Y = Convert.ToInt32(pictureBox1.Height*py);
+                Point pt1 = pictureBox1.Location;
+
+                pictureBox2.Location = new Point(pt1.X + X - 10, pt1.Y + Y - 10);
 
             }
         }
@@ -716,8 +738,28 @@ namespace PDFQFZ
                 imgStartPage++;
                 PDFFile pdfFile = PDFFile.Open(pdfInputPath);
                 Bitmap pageImage = pdfFile.GetPageImage(imgStartPage-1, 56 * 1);
+                pdfFile.Dispose();
                 pictureBox1.Image = pageImage;
                 labelPage.Text = imgStartPage + "/" + imgPageCount;
+
+                float px,py;
+                DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
+                if (arrRow == null || arrRow.Length == 0)
+                {
+                    px = Convert.ToSingle(textPx.Text);//这里根据比例来定位
+                    py = Convert.ToSingle(textPy.Text);//这里根据比例来定位
+                }
+                else
+                {
+                    DataRow dr = arrRow[0];
+                    px = Convert.ToSingle(dr["X"].ToString());
+                    py = Convert.ToSingle(dr["Y"].ToString());
+                }
+                int X = Convert.ToInt32(pictureBox1.Width * px);
+                int Y = Convert.ToInt32(pictureBox1.Height * py);
+                Point pt1 = pictureBox1.Location;
+
+                pictureBox2.Location = new Point(pt1.X + X - 10, pt1.Y + Y - 10);
 
             }
         }
@@ -785,6 +827,7 @@ namespace PDFQFZ
             pictureBox1.Image = pageImage;
             imgStartPage = 1;
             imgPageCount = pdfFile.PageCount;
+            pdfFile.Dispose();
             labelPage.Text = imgStartPage + "/" + imgPageCount;
         }
         //根据印章类型切换窗口大小
