@@ -447,7 +447,9 @@ namespace PDFQFZ
 
                         Org.BouncyCastle.X509.X509CertificateParser cp = new Org.BouncyCastle.X509.X509CertificateParser();
                         Org.BouncyCastle.X509.X509Certificate[] chain = new Org.BouncyCastle.X509.X509Certificate[] {cp.ReadCertificate(cert.RawData)};
-                        IExternalSignature externalSignature = new X509Certificate2Signature(cert, DigestAlgorithms.SHA1);
+
+                        Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair pk = Org.BouncyCastle.Security.DotNetUtilities.GetKeyPair(cert.PrivateKey);
+                        IExternalSignature externalSignature = new PrivateKeySignature(pk.Private, DigestAlgorithms.SHA256);
 
                         PdfSignatureAppearance signatureAppearance = pdfStamper.SignatureAppearance;
                         signatureAppearance.SignDate = DateTime.Now;
