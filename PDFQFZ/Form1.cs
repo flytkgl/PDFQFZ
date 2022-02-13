@@ -350,6 +350,11 @@ namespace PDFQFZ
                         signpage = numberOfPages;
                         all = true;
                     }
+                    else if (zyz == 4)
+                    {
+                        signpage = numberOfPages;
+                        all = true;
+                    }
 
                     for (int i = 1; i <= numberOfPages; i++)
                     {
@@ -367,6 +372,10 @@ namespace PDFQFZ
                             DataRow[] arrRow = dtPos.Select("Path = '" + inputfilepath + "' and Page = " + i);
                             if (arrRow == null || arrRow.Length == 0)
                             {
+                                if(zyz == 4)//自定义页加印章,如果没有印章定位的页就不盖
+                                {
+                                    continue;
+                                }
                                 wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
                                 hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
                             }
@@ -628,6 +637,7 @@ namespace PDFQFZ
             }
             Point pt1 = pictureBox1.Location;
 
+            pictureBox2.Visible = true;
             pictureBox2.Location = new Point(pt1.X+pt.X-10, pt1.Y + pt.Y - 10);
 
         }
@@ -705,11 +715,16 @@ namespace PDFQFZ
                 DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
                 if (arrRow == null || arrRow.Length == 0)
                 {
+                    if (comboYz.SelectedIndex == 4)
+                    {
+                        pictureBox2.Visible = false;
+                    }
                     px = Convert.ToSingle(textPx.Text);//这里根据比例来定位
                     py = Convert.ToSingle(textPy.Text);//这里根据比例来定位
                 }
                 else
                 {
+                    pictureBox2.Visible = true;
                     DataRow dr = arrRow[0];
                     px = Convert.ToSingle(dr["X"].ToString());
                     py = Convert.ToSingle(dr["Y"].ToString());
@@ -738,11 +753,16 @@ namespace PDFQFZ
                 DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
                 if (arrRow == null || arrRow.Length == 0)
                 {
+                    if (comboYz.SelectedIndex == 4)
+                    {
+                        pictureBox2.Visible = false;
+                    }
                     px = Convert.ToSingle(textPx.Text);//这里根据比例来定位
                     py = Convert.ToSingle(textPy.Text);//这里根据比例来定位
                 }
                 else
                 {
+                    pictureBox2.Visible = true;
                     DataRow dr = arrRow[0];
                     px = Convert.ToSingle(dr["X"].ToString());
                     py = Convert.ToSingle(dr["Y"].ToString());
@@ -814,32 +834,47 @@ namespace PDFQFZ
         private void comboPDFlist_SelectionChangeCommitted(object sender, EventArgs e)
         {
             pdfInputPath = comboPDFlist.SelectedValue.ToString();
-            PDFFile pdfFile = PDFFile.Open(pdfInputPath);
-            Bitmap pageImage = pdfFile.GetPageImage(0, 56 * 1);
-            pictureBox1.Image = pageImage;
-            imgStartPage = 1;
-            imgPageCount = pdfFile.PageCount;
-            pdfFile.Dispose();
-            labelPage.Text = imgStartPage + "/" + imgPageCount;
-
-            float px, py;
-            DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
-            if (arrRow == null || arrRow.Length == 0)
+            if (pdfInputPath != "")
             {
-                px = Convert.ToSingle(textPx.Text);//这里根据比例来定位
-                py = Convert.ToSingle(textPy.Text);//这里根据比例来定位
+                PDFFile pdfFile = PDFFile.Open(pdfInputPath);
+                Bitmap pageImage = pdfFile.GetPageImage(0, 56 * 1);
+                pictureBox1.Image = pageImage;
+                imgStartPage = 1;
+                imgPageCount = pdfFile.PageCount;
+                pdfFile.Dispose();
+                labelPage.Text = imgStartPage + "/" + imgPageCount;
+
+                float px, py;
+                DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
+                if (arrRow == null || arrRow.Length == 0)
+                {
+                    px = Convert.ToSingle(textPx.Text);//这里根据比例来定位
+                    py = Convert.ToSingle(textPy.Text);//这里根据比例来定位
+                }
+                else
+                {
+                    DataRow dr = arrRow[0];
+                    px = Convert.ToSingle(dr["X"].ToString());
+                    py = Convert.ToSingle(dr["Y"].ToString());
+                }
+                int X = Convert.ToInt32(pictureBox1.Width * px);
+                int Y = Convert.ToInt32(pictureBox1.Height * py);
+                Point pt1 = pictureBox1.Location;
+
+                pictureBox2.Location = new Point(pt1.X + X - 10, pt1.Y + Y - 10);
             }
             else
             {
-                DataRow dr = arrRow[0];
-                px = Convert.ToSingle(dr["X"].ToString());
-                py = Convert.ToSingle(dr["Y"].ToString());
+                imgStartPage = 1;
+                imgPageCount = 1;
+                labelPage.Text = "1/1";
+                Bitmap bmp = new Bitmap(177, 250);
+                Graphics g = Graphics.FromImage(bmp);
+                g.FillRectangle(Brushes.White, new Rectangle(0, 0, 177, 250));
+                g.Dispose();
+                pictureBox1.Image = bmp;
             }
-            int X = Convert.ToInt32(pictureBox1.Width * px);
-            int Y = Convert.ToInt32(pictureBox1.Height * py);
-            Point pt1 = pictureBox1.Location;
-
-            pictureBox2.Location = new Point(pt1.X + X - 10, pt1.Y + Y - 10);
+            
         }
         //根据印章类型切换窗口大小
         private void comboYz_SelectionChangeCommitted(object sender, EventArgs e)

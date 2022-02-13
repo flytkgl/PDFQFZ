@@ -192,7 +192,8 @@
             "不加印章",
             "尾页加印章",
             "首页加印章",
-            "所有页加印章"});
+            "所有页加印章",
+            "自定义加印章"});
             this.comboYz.Location = new System.Drawing.Point(290, 12);
             this.comboYz.Name = "comboYz";
             this.comboYz.Size = new System.Drawing.Size(145, 20);
@@ -483,7 +484,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.7";
+            this.Text = "PDF加盖骑缝章 V1.8";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
