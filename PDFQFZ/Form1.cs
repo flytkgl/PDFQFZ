@@ -776,6 +776,19 @@ namespace PDFQFZ
             }
         }
 
+        private void pictureBox2_DoubleClick(object sender, EventArgs e)
+        {
+            if (comboYz.SelectedIndex == 4)
+            {
+                pictureBox2.Visible = false;
+                DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
+                if(arrRow != null || arrRow.Length > 0)
+                {
+                    dtPos.Rows.Remove(arrRow[0]);
+                }  
+            }
+        }
+
         //数字签名类型
         private void comboQmtype_SelectionChangeCommitted(object sender, EventArgs e)
         {
