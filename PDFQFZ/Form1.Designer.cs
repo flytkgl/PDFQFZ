@@ -41,7 +41,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.log = new System.Windows.Forms.TextBox();
-            this.clear = new System.Windows.Forms.Button();
             this.comboYz = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textPx = new System.Windows.Forms.TextBox();
@@ -67,13 +66,15 @@
             this.labelPage = new System.Windows.Forms.Label();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.textRotation = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // bt_gz
             // 
-            this.bt_gz.Location = new System.Drawing.Point(299, 198);
+            this.bt_gz.Location = new System.Drawing.Point(370, 198);
             this.bt_gz.Name = "bt_gz";
             this.bt_gz.Size = new System.Drawing.Size(65, 23);
             this.bt_gz.TabIndex = 0;
@@ -83,11 +84,14 @@
             // 
             // pathText
             // 
+            this.pathText.AllowDrop = true;
             this.pathText.Location = new System.Drawing.Point(96, 57);
             this.pathText.Name = "pathText";
             this.pathText.ReadOnly = true;
             this.pathText.Size = new System.Drawing.Size(339, 21);
             this.pathText.TabIndex = 1;
+            this.pathText.DragDrop += new System.Windows.Forms.DragEventHandler(this.pathText_DragDrop);
+            this.pathText.DragEnter += new System.Windows.Forms.DragEventHandler(this.pathText_DragEnter);
             // 
             // SelectPath
             // 
@@ -109,11 +113,14 @@
             // 
             // textGZpath
             // 
+            this.textGZpath.AllowDrop = true;
             this.textGZpath.Location = new System.Drawing.Point(96, 144);
             this.textGZpath.Name = "textGZpath";
             this.textGZpath.ReadOnly = true;
             this.textGZpath.Size = new System.Drawing.Size(339, 21);
             this.textGZpath.TabIndex = 4;
+            this.textGZpath.DragDrop += new System.Windows.Forms.DragEventHandler(this.textGZpath_DragDrop);
+            this.textGZpath.DragEnter += new System.Windows.Forms.DragEventHandler(this.textGZpath_DragEnter);
             // 
             // OutPath
             // 
@@ -173,16 +180,6 @@
             this.log.TabIndex = 10;
             this.log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40m" +
     "m印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可";
-            // 
-            // clear
-            // 
-            this.clear.Location = new System.Drawing.Point(370, 198);
-            this.clear.Name = "clear";
-            this.clear.Size = new System.Drawing.Size(65, 23);
-            this.clear.TabIndex = 11;
-            this.clear.Text = "重置";
-            this.clear.UseVisualStyleBackColor = true;
-            this.clear.Click += new System.EventHandler(this.clear_Click);
             // 
             // comboYz
             // 
@@ -280,7 +277,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(157, 203);
+            this.label6.Location = new System.Drawing.Point(241, 203);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(65, 12);
             this.label6.TabIndex = 23;
@@ -289,7 +286,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(255, 203);
+            this.label8.Location = new System.Drawing.Point(339, 203);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(11, 12);
             this.label8.TabIndex = 25;
@@ -297,7 +294,7 @@
             // 
             // textWzbl
             // 
-            this.textWzbl.Location = new System.Drawing.Point(226, 199);
+            this.textWzbl.Location = new System.Drawing.Point(310, 199);
             this.textWzbl.Name = "textWzbl";
             this.textWzbl.Size = new System.Drawing.Size(23, 21);
             this.textWzbl.TabIndex = 24;
@@ -439,11 +436,30 @@
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
+            // textRotation
+            // 
+            this.textRotation.Location = new System.Drawing.Point(204, 200);
+            this.textRotation.Name = "textRotation";
+            this.textRotation.Size = new System.Drawing.Size(23, 21);
+            this.textRotation.TabIndex = 39;
+            this.textRotation.Text = "0";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(148, 204);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(53, 12);
+            this.label10.TabIndex = 38;
+            this.label10.Text = "旋转角度";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.textRotation);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.labelPage);
             this.Controls.Add(this.buttonUp);
@@ -469,7 +485,6 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.comboYz);
-            this.Controls.Add(this.clear);
             this.Controls.Add(this.log);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -485,7 +500,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.8";
+            this.Text = "PDF加盖骑缝章 V1.9";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -508,7 +523,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox log;
-        private System.Windows.Forms.Button clear;
         private System.Windows.Forms.ComboBox comboYz;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label label4;
@@ -534,6 +548,8 @@
         private System.Windows.Forms.Button buttonUp;
         private System.Windows.Forms.Label labelPage;
         private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.TextBox textRotation;
+        private System.Windows.Forms.Label label10;
     }
 }
 

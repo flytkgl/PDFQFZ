@@ -183,6 +183,7 @@ namespace PDFQFZ
                 MessageBox.Show(ex.ToString());
             }
         }
+
         //分割图片
         private static Bitmap[] subImages(String imgPath, int n)//图片分割
         {
@@ -209,8 +210,9 @@ namespace PDFQFZ
             int zyz = comboYz.SelectedIndex;//加印章方式
             int zqfz = comboQfz.SelectedIndex;//加骑缝章方式
             int sftype = comboBoxBL.SelectedIndex;//印章缩放方式
-            float sfsize, qfzwzbl;
+            float sfsize, yzrotation, qfzwzbl;
             float.TryParse(textBili.Text, out sfsize);//印章缩放尺寸
+            float.TryParse(textRotation.Text, out yzrotation);//骑缝章位置比例
             float.TryParse(textWzbl.Text, out qfzwzbl);//骑缝章位置比例
             float picbl = 1.003f;//别问我这个数值怎么来的
             float picmm = 2.842f;//别问我这个数值怎么来的
@@ -269,23 +271,29 @@ namespace PDFQFZ
                             //image.GrayFill = 20;//透明度，灰色填充
                             //image.Rotation//旋转
                             //image.ScaleToFit(140F, 320F);//设置图片的指定大小
-                            //image.RotationDegrees//旋转角度
+                            //image.RotationDegrees = yzrotation//旋转角度
                             float sfbl, imageW, imageH;
                             if (sftype == 0)
                             {
                                 sfbl = sfsize * picbl;//别问我为什么要乘这个
-                                imageW = image.Width * sfbl / 100f;
-                                imageH = image.Height * sfbl / 100f;
-                                //image.ScalePercent(sfbl);//设置图片比例
-                                image.ScaleToFit(imageW, imageH);//设置图片的指定大小
+                                image.ScalePercent(sfbl);//设置图片比例
+
+                                //imageW = image.Width * sfbl / 100f;
+                                //imageH = image.Height * sfbl / 100f;
+                                //image.ScaleToFit(imageW, imageH);//设置图片的指定大小
                             }
                             else
                             {
-                                sfbl = sfsize * picmm;//别问我为什么要乘这个
-                                imageW = sfbl / tmp;
-                                imageH = sfbl;
-                                image.ScaleToFit(imageW, imageH);//设置图片的指定大小
+                                sfbl = 100f * sfsize * picmm / image.Height;
+                                image.ScalePercent(sfbl);//设置图片比例
+
+                                //sfbl = sfsize * picmm;//别问我为什么要乘这个
+                                //imageW = sfbl / tmp;
+                                //imageH = sfbl;
+                                //image.ScaleToFit(imageW, imageH);//设置图片的指定大小
                             }
+                            imageW = image.Width * sfbl / 100f;
+                            imageH = image.Height * sfbl / 100f;
 
                             //水印的位置
                             float xPos, yPos;
@@ -310,7 +318,7 @@ namespace PDFQFZ
                 if (zyz!=0|| comboQmtype.SelectedIndex != 0)
                 {
                     iTextSharp.text.Image img = null;
-                    float sfbl, imgW=0, imgH=0;
+                    float sfbl=100f, imgW=0, imgH=0;
                     float xPos=0, yPos=0;
                     bool all = false;
                     int signpage = 0;
@@ -319,23 +327,28 @@ namespace PDFQFZ
                     {
                         img = iTextSharp.text.Image.GetInstance(ModelPicName);//创建一个图片对象
                         img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+                        img.RotationDegrees = yzrotation;
 
                         if (sftype == 0)
                         {
                             sfbl = sfsize * picbl;//别问我为什么要乘这个
-                            imgW = img.Width * sfbl / 100f;
-                            imgH = img.Height * sfbl / 100f;
-                            //img.ScalePercent(sfbl);//设置图片比例
-                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小
+                            img.ScalePercent(sfbl);//设置图片比例
+                            //imgW = img.Width * sfbl / 100f;
+                            //imgH = img.Height * sfbl / 100f;
+                            //img.ScaleToFit(imgW, imgH);//设置图片的指定大小
                         }
                         else
                         {
-                            sfbl = sfsize * picmm;//别问我为什么要乘这个
-                            imgW = sfbl;
-                            imgH = sfbl* img.Height/ img.Width;
-                            img.ScaleToFit(imgW, imgH);//设置图片的指定大小,实际只能指定宽度,高度还是按照图片比例计算的
+                            sfbl = 100f*sfsize * picmm / img.Height;
+                            img.ScalePercent(sfbl);//设置图片比例
+                            //sfbl = sfsize * picmm;//别问我为什么要乘这个
+                            //imgW = sfbl;
+                            //imgH = sfbl* img.Height/ img.Width;
+                            //img.ScaleToFit(imgW, imgH);//设置图片的指定大小,实际只能指定宽度,高度还是按照图片比例计算的
                         }
                     }
+                    imgW = img.Width * sfbl / 100f;
+                    imgH = img.Height * sfbl / 100f;
 
                     if (zyz == 1)
                     {
@@ -577,20 +590,6 @@ namespace PDFQFZ
                 textGZpath.Text = file.FileName;
             }
         }
-        //重置按钮
-        private void clear_Click(object sender, EventArgs e)
-        {
-            pathText.Text = "";
-            textBCpath.Text = "";
-            textGZpath.Text = "";
-            imgPageCount = 0;
-            imgStartPage = 0;
-            dt.Rows.Clear();
-            dtPos.Rows.Clear();
-            pdfInputPath = null;
-            log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40mm印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可";
-
-        }
         //程序加载
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -784,10 +783,87 @@ namespace PDFQFZ
                 DataRow[] arrRow = dtPos.Select("Path = '" + pdfInputPath + "' and Page = " + imgStartPage);
                 if(arrRow != null || arrRow.Length > 0)
                 {
-                    dtPos.Rows.Remove(arrRow[0]);
+                    try
+                    {
+                        dtPos.Rows.Remove(arrRow[0]);
+                    }
+                    catch
+                    {
+
+                    }
+                    
                 }  
             }
         }
+
+        private void pathText_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.All;//调用DragDrop事件
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void pathText_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop);//拖放的多个文件的路径列表
+
+            if (Directory.Exists(filePaths[0])&&comboType.SelectedIndex==0)
+            {
+                this.pathText.Text = filePaths[0];
+                this.textBCpath.Text = filePaths[0] + "\\QFZ";
+            }
+            else
+            {
+                string pdfPaths = "";
+
+                foreach (string filePath in filePaths)
+                {
+                    string extension = System.IO.Path.GetExtension(filePath);//文件后缀名
+                    if (extension == ".pdf")
+                    {
+                        //todo you code
+                        pdfPaths += filePath + ",";
+                    }
+                }
+                if(pdfPaths.Length > 0)
+                {
+                    pdfPaths = pdfPaths.Substring(0, pdfPaths.Length - 1);
+                    this.pathText.Text = pdfPaths;
+                    this.textBCpath.Text = System.IO.Path.GetDirectoryName(filePaths[0]);
+                }
+            }
+            
+        }
+
+        private void textGZpath_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.All;//调用DragDrop事件
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void textGZpath_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop);//拖放的多个文件的路径列表
+
+            string extension = System.IO.Path.GetExtension(filePaths[0]);//文件后缀名
+            if ((extension == ".gif") || (extension == ".bmp") || (extension == ".png") || (extension == ".jpg") || (extension == ".jpeg"))
+            {
+                //todo you code
+                this.textGZpath.Text = filePaths[0];
+            }
+        }
+
 
         //数字签名类型
         private void comboQmtype_SelectionChangeCommitted(object sender, EventArgs e)
