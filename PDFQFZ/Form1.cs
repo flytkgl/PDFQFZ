@@ -184,6 +184,49 @@ namespace PDFQFZ
             }
         }
 
+        public Bitmap RotateImg(Image b, int angle, string filename)
+        {
+            angle = angle % 360;
+            //弧度转换 
+            double radian = angle * Math.PI / 180.0;
+            double cos = Math.Cos(radian);
+            double sin = Math.Sin(radian);
+            //原图的宽和高 
+            int w = b.Width;
+            int h = b.Height;
+            int W = (int)(Math.Max(Math.Abs(w * cos - h * sin), Math.Abs(w * cos + h * sin)));
+            int H = (int)(Math.Max(Math.Abs(w * sin - h * cos), Math.Abs(w * sin + h * cos)));
+
+
+            //为了尽可能的去除白边,减小印章旋转后尺寸的误差,这里保持原印章宽度,切掉部分角
+            H = (int)(1f * H * w / W);
+            W = w;
+
+
+            //目标位图 
+            Bitmap dsImage = new Bitmap(W, H);
+            System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(dsImage);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            //计算偏移量 
+            Point Offset = new Point((W - w) / 2, (H - h) / 2);
+            //构造图像显示区域:让图像的中心与窗口的中心点一致 
+            Rectangle rect = new Rectangle(Offset.X, Offset.Y, w, h);
+            Point center = new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+            g.TranslateTransform(center.X, center.Y);
+            g.RotateTransform(angle);
+            //恢复图像在水平和垂直方向的平移 
+            g.TranslateTransform(-center.X, -center.Y);
+            g.DrawImage(b, rect);
+            //重至绘图的所有变换 
+            g.ResetTransform();
+            g.Save();
+            g.Dispose();
+            //保存旋转后的图片 
+            dsImage.Save(filename, System.Drawing.Imaging.ImageFormat.Png);
+            return dsImage;
+        }
+
         //分割图片
         private static Bitmap[] subImages(String imgPath, int n)//图片分割
         {
@@ -210,15 +253,23 @@ namespace PDFQFZ
             int zyz = comboYz.SelectedIndex;//加印章方式
             int zqfz = comboQfz.SelectedIndex;//加骑缝章方式
             int sftype = comboBoxBL.SelectedIndex;//印章缩放方式
-            float sfsize, yzrotation, qfzwzbl;
+            float sfsize,opacity, yzrotation, qfzwzbl;
             float.TryParse(textBili.Text, out sfsize);//印章缩放尺寸
-            float.TryParse(textRotation.Text, out yzrotation);//骑缝章位置比例
+            float.TryParse(textOpacity.Text, out opacity);//不透明度比例
+            float.TryParse(textRotation.Text, out yzrotation);//印章旋转角度
             float.TryParse(textWzbl.Text, out qfzwzbl);//骑缝章位置比例
             float picbl = 1.003f;//别问我这个数值怎么来的
             float picmm = 2.842f;//别问我这个数值怎么来的
 
+            if (yzrotation != 0)
+            {
+                string filename = System.IO.Path.GetTempPath()+"PDFQFZ_tmp.png";
+                RotateImg(new Bitmap(ModelPicName), (int)yzrotation, filename);
+                ModelPicName = filename;
+            }
+            
             PdfGState state = new PdfGState();
-            state.FillOpacity = 0.6f;//印章图片整体透明度
+            state.FillOpacity = opacity/100f;//印章图片不透明度
 
             //throw new NotImplementedException();
             PdfReader pdfReader = null;
@@ -284,7 +335,7 @@ namespace PDFQFZ
                             }
                             else
                             {
-                                sfbl = 100f * sfsize * picmm / image.Height;
+                                sfbl = 100f * sfsize * picmm / (image.Width * tmp);//印章尺寸*DPI转换比例/(分割后图片的宽度*分割份数),再转百分比
                                 image.ScalePercent(sfbl);//设置图片比例
 
                                 //sfbl = sfsize * picmm;//别问我为什么要乘这个
@@ -327,7 +378,7 @@ namespace PDFQFZ
                     {
                         img = iTextSharp.text.Image.GetInstance(ModelPicName);//创建一个图片对象
                         img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
-                        img.RotationDegrees = yzrotation;
+                        //img.RotationDegrees = yzrotation;
 
                         if (sftype == 0)
                         {
@@ -339,7 +390,7 @@ namespace PDFQFZ
                         }
                         else
                         {
-                            sfbl = 100f*sfsize * picmm / img.Height;
+                            sfbl = 100f*sfsize * picmm / img.Width;
                             img.ScalePercent(sfbl);//设置图片比例
                             //sfbl = sfsize * picmm;//别问我为什么要乘这个
                             //imgW = sfbl;
@@ -614,10 +665,13 @@ namespace PDFQFZ
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             Point pt = pictureBox1.PointToClient(Control.MousePosition);
-            float picw = pictureBox1.Width;
-            float pich = pictureBox1.Height;
-            float px = pt.X / picw;
-            float py = pt.Y / pich;
+            int picw = pictureBox1.Width;
+            int pich = pictureBox1.Height;
+
+            if (pt.X > picw) pt.X = picw;
+            if (pt.Y > pich) pt.Y = pich;
+            float px = 1f * pt.X / picw;
+            float py = 1f * pt.Y / pich;
             textPx.Text = px.ToString("#0.0000");
             textPy.Text = py.ToString("#0.0000");
             DataRow[] arrRow = dtPos.Select("Path = '"+ pdfInputPath + "' and Page = "+ imgStartPage);

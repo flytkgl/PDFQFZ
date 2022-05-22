@@ -68,13 +68,17 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.textRotation = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.textOpacity = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // bt_gz
             // 
-            this.bt_gz.Location = new System.Drawing.Point(370, 198);
+            this.bt_gz.Location = new System.Drawing.Point(370, 11);
             this.bt_gz.Name = "bt_gz";
             this.bt_gz.Size = new System.Drawing.Size(65, 23);
             this.bt_gz.TabIndex = 0;
@@ -191,9 +195,9 @@
             "首页加印章",
             "所有页加印章",
             "自定义加印章"});
-            this.comboYz.Location = new System.Drawing.Point(290, 12);
+            this.comboYz.Location = new System.Drawing.Point(248, 12);
             this.comboYz.Name = "comboYz";
-            this.comboYz.Size = new System.Drawing.Size(145, 20);
+            this.comboYz.Size = new System.Drawing.Size(110, 20);
             this.comboYz.TabIndex = 12;
             this.comboYz.SelectionChangeCommitted += new System.EventHandler(this.comboYz_SelectionChangeCommitted);
             // 
@@ -235,7 +239,7 @@
             // 
             // textBili
             // 
-            this.textBili.Location = new System.Drawing.Point(96, 198);
+            this.textBili.Location = new System.Drawing.Point(96, 199);
             this.textBili.Name = "textBili";
             this.textBili.Size = new System.Drawing.Size(23, 21);
             this.textBili.TabIndex = 19;
@@ -277,7 +281,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(241, 203);
+            this.label6.Location = new System.Drawing.Point(323, 203);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(65, 12);
             this.label6.TabIndex = 23;
@@ -286,7 +290,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(339, 203);
+            this.label8.Location = new System.Drawing.Point(421, 203);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(11, 12);
             this.label8.TabIndex = 25;
@@ -294,7 +298,7 @@
             // 
             // textWzbl
             // 
-            this.textWzbl.Location = new System.Drawing.Point(310, 199);
+            this.textWzbl.Location = new System.Drawing.Point(392, 199);
             this.textWzbl.Name = "textWzbl";
             this.textWzbl.Size = new System.Drawing.Size(23, 21);
             this.textWzbl.TabIndex = 24;
@@ -309,7 +313,7 @@
             "文件模式"});
             this.comboType.Location = new System.Drawing.Point(13, 12);
             this.comboType.Name = "comboType";
-            this.comboType.Size = new System.Drawing.Size(120, 20);
+            this.comboType.Size = new System.Drawing.Size(110, 20);
             this.comboType.TabIndex = 26;
             this.comboType.SelectionChangeCommitted += new System.EventHandler(this.comboType_SelectionChangeCommitted);
             // 
@@ -320,9 +324,9 @@
             this.comboQfz.Items.AddRange(new object[] {
             "加盖骑缝章",
             "不加骑缝章"});
-            this.comboQfz.Location = new System.Drawing.Point(139, 12);
+            this.comboQfz.Location = new System.Drawing.Point(130, 12);
             this.comboQfz.Name = "comboQfz";
-            this.comboQfz.Size = new System.Drawing.Size(145, 20);
+            this.comboQfz.Size = new System.Drawing.Size(110, 20);
             this.comboQfz.TabIndex = 27;
             // 
             // comboQmtype
@@ -438,7 +442,7 @@
             // 
             // textRotation
             // 
-            this.textRotation.Location = new System.Drawing.Point(204, 200);
+            this.textRotation.Location = new System.Drawing.Point(181, 200);
             this.textRotation.Name = "textRotation";
             this.textRotation.Size = new System.Drawing.Size(23, 21);
             this.textRotation.TabIndex = 39;
@@ -449,15 +453,54 @@
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(148, 204);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(53, 12);
+            this.label10.Size = new System.Drawing.Size(29, 12);
             this.label10.TabIndex = 38;
-            this.label10.Text = "旋转角度";
+            this.label10.Text = "旋转";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(210, 204);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(17, 12);
+            this.label9.TabIndex = 40;
+            this.label9.Text = "°";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(303, 204);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(11, 12);
+            this.label11.TabIndex = 43;
+            this.label11.Text = "%";
+            // 
+            // textOpacity
+            // 
+            this.textOpacity.Location = new System.Drawing.Point(274, 200);
+            this.textOpacity.Name = "textOpacity";
+            this.textOpacity.Size = new System.Drawing.Size(23, 21);
+            this.textOpacity.TabIndex = 42;
+            this.textOpacity.Text = "100";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(228, 204);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(41, 12);
+            this.label12.TabIndex = 41;
+            this.label12.Text = "不透明";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.label11);
+            this.Controls.Add(this.textOpacity);
+            this.Controls.Add(this.label12);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.textRotation);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.pictureBox2);
@@ -550,6 +593,10 @@
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.TextBox textRotation;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox textOpacity;
+        private System.Windows.Forms.Label label12;
     }
 }
 
