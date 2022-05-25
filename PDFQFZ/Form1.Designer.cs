@@ -72,6 +72,7 @@
             this.label11 = new System.Windows.Forms.Label();
             this.textOpacity = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
+            this.comboDJ = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -195,9 +196,9 @@
             "首页加印章",
             "所有页加印章",
             "自定义加印章"});
-            this.comboYz.Location = new System.Drawing.Point(248, 12);
+            this.comboYz.Location = new System.Drawing.Point(196, 12);
             this.comboYz.Name = "comboYz";
-            this.comboYz.Size = new System.Drawing.Size(110, 20);
+            this.comboYz.Size = new System.Drawing.Size(100, 20);
             this.comboYz.TabIndex = 12;
             this.comboYz.SelectionChangeCommitted += new System.EventHandler(this.comboYz_SelectionChangeCommitted);
             // 
@@ -313,7 +314,7 @@
             "文件模式"});
             this.comboType.Location = new System.Drawing.Point(13, 12);
             this.comboType.Name = "comboType";
-            this.comboType.Size = new System.Drawing.Size(110, 20);
+            this.comboType.Size = new System.Drawing.Size(80, 20);
             this.comboType.TabIndex = 26;
             this.comboType.SelectionChangeCommitted += new System.EventHandler(this.comboType_SelectionChangeCommitted);
             // 
@@ -324,9 +325,9 @@
             this.comboQfz.Items.AddRange(new object[] {
             "加盖骑缝章",
             "不加骑缝章"});
-            this.comboQfz.Location = new System.Drawing.Point(130, 12);
+            this.comboQfz.Location = new System.Drawing.Point(100, 12);
             this.comboQfz.Name = "comboQfz";
-            this.comboQfz.Size = new System.Drawing.Size(110, 20);
+            this.comboQfz.Size = new System.Drawing.Size(90, 20);
             this.comboQfz.TabIndex = 27;
             // 
             // comboQmtype
@@ -492,11 +493,24 @@
             this.label12.TabIndex = 41;
             this.label12.Text = "不透明";
             // 
+            // comboDJ
+            // 
+            this.comboDJ.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboDJ.FormattingEnabled = true;
+            this.comboDJ.Items.AddRange(new object[] {
+            "叠加",
+            "合并"});
+            this.comboDJ.Location = new System.Drawing.Point(304, 12);
+            this.comboDJ.Name = "comboDJ";
+            this.comboDJ.Size = new System.Drawing.Size(56, 20);
+            this.comboDJ.TabIndex = 44;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.comboDJ);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.textOpacity);
             this.Controls.Add(this.label12);
@@ -543,7 +557,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.9";
+            this.Text = "PDF加盖骑缝章 V1.10";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -597,6 +611,7 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox textOpacity;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.ComboBox comboDJ;
     }
 }
 
