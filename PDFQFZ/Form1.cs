@@ -969,6 +969,17 @@ namespace PDFQFZ
             {
                 this.pathText.Text = filePaths[0];
                 this.textBCpath.Text = filePaths[0] + "\\QFZ";
+                dt.Rows.Clear();
+                dt.Rows.Add(new object[] { "", "" });
+                DirectoryInfo dir = new DirectoryInfo(pathText.Text);
+                var fileInfos = dir.GetFiles();
+                foreach (var fileInfo in fileInfos)
+                {
+                    if (fileInfo.Extension == ".pdf")
+                    {
+                        dt.Rows.Add(new object[] { fileInfo.Name, fileInfo.FullName });
+                    }
+                }
             }
             else
             {
@@ -988,6 +999,14 @@ namespace PDFQFZ
                     pdfPaths = pdfPaths.Substring(0, pdfPaths.Length - 1);
                     this.pathText.Text = pdfPaths;
                     this.textBCpath.Text = System.IO.Path.GetDirectoryName(filePaths[0]);
+                    dt.Rows.Clear();
+                    dt.Rows.Add(new object[] { "", "" });
+                    foreach (string filePath in filePaths)
+                    {
+                        string filename = System.IO.Path.GetFileName(filePath.ToString());//文件名
+                        dt.Rows.Add(new object[] { filename, filePath });
+                    }
+
                 }
             }
             
