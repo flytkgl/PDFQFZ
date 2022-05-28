@@ -48,7 +48,6 @@
             this.label5 = new System.Windows.Forms.Label();
             this.textBili = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.buttonYLT = new System.Windows.Forms.Button();
             this.comboBoxBL = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -254,17 +253,6 @@
             this.label7.Size = new System.Drawing.Size(17, 12);
             this.label7.TabIndex = 20;
             this.label7.Text = "mm";
-            // 
-            // buttonYLT
-            // 
-            this.buttonYLT.Location = new System.Drawing.Point(525, 300);
-            this.buttonYLT.Name = "buttonYLT";
-            this.buttonYLT.Size = new System.Drawing.Size(109, 23);
-            this.buttonYLT.TabIndex = 21;
-            this.buttonYLT.Text = "设置自定义预览图";
-            this.buttonYLT.UseVisualStyleBackColor = true;
-            this.buttonYLT.Visible = false;
-            this.buttonYLT.Click += new System.EventHandler(this.buttonYLT_Click);
             // 
             // comboBoxBL
             // 
@@ -533,7 +521,6 @@
             this.Controls.Add(this.textWzbl);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.comboBoxBL);
-            this.Controls.Add(this.buttonYLT);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.textBili);
             this.Controls.Add(this.label5);
@@ -557,7 +544,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.10";
+            this.Text = "PDF加盖骑缝章 V1.10.1";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -588,7 +575,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBili;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button buttonYLT;
         private System.Windows.Forms.ComboBox comboBoxBL;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label8;
