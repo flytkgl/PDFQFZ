@@ -680,7 +680,7 @@ namespace PDFQFZ
             {
                 Bitmap pageImage = pdfFile.GetPageImage(i, dpi);
                 bitmaps[i] = pageImage;
-                pageImage.Save("D:\\tmp\\img\\" + i + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                // pageImage.Save("D:\\tmp\\img\\" + i + ".png", System.Drawing.Imaging.ImageFormat.Png);
             }
             pdfFile.Dispose();
 
