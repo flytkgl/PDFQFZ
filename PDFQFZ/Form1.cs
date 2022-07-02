@@ -175,6 +175,10 @@ namespace PDFQFZ
                 {
                     imgYz = RotateImg(imgYz, rotation);
                 }
+                if (opacity < 100)
+                {
+                    imgYz = SetImageOpacity(imgYz, opacity);
+                }
 
                 //目录模式还是文件模式
                 if (wjType == 0)
@@ -237,7 +241,32 @@ namespace PDFQFZ
                 MessageBox.Show(ex.ToString());
             }
         }
+        //设置图片透明度
+        private Bitmap SetImageOpacity(Image srcImage, int opacity)
+        {
+            opacity = opacity * 255/100;
+            Bitmap pic = new Bitmap(srcImage);
+            for (int w = 0; w < pic.Width; w++)
+            {
+                for (int h = 0; h < pic.Height; h++)
+                {
+                    Color c = pic.GetPixel(w, h);
+                    Color newC;
+                    if (!c.Equals(Color.FromArgb(0, 0, 0, 0)))
+                    {
+                        newC = Color.FromArgb(opacity, c);
+                    }
+                    else
+                    {
+                        newC = c;
+                    }
+                    pic.SetPixel(w, h, newC);
+                }
+            }
 
+            return pic;
+        }
+        //旋转图片
         public Bitmap RotateImg(Image b, int angle)
         {
             angle = angle % 360;
@@ -306,8 +335,8 @@ namespace PDFQFZ
             float picbl = 1.003f;//别问我这个数值怎么来的
             float picmm = 2.842f;//别问我这个数值怎么来的
 
-            PdfGState state = new PdfGState();
-            state.FillOpacity = 0.01f*opacity;//印章图片不透明度
+            //PdfGState state = new PdfGState();
+            //state.FillOpacity = 0.01f*opacity;//印章图片不透明度
 
             //throw new NotImplementedException();
             PdfReader pdfReader = null;
@@ -353,10 +382,10 @@ namespace PDFQFZ
                             waterMarkContent = pdfStamper.GetOverContent(page);//获取当前页内容
                             int rotation = pdfReader.GetPageRotation(page);//获取当前页的旋转度
                             iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(page);//获取当前页尺寸
-                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[x - 1], System.Drawing.Imaging.ImageFormat.Bmp);//获取骑缝章对应页的部分
-                            image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
-                            waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
-                            waterMarkContent.SetGState(state);
+                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[x - 1], System.Drawing.Imaging.ImageFormat.Png);//获取骑缝章对应页的部分
+                            //image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+                            //waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
+                            //waterMarkContent.SetGState(state);
                             //image.GrayFill = 20;//透明度，灰色填充
                             //image.Rotation//旋转
                             //image.ScaleToFit(140F, 320F);//设置图片的指定大小
@@ -398,7 +427,7 @@ namespace PDFQFZ
                             }
                             image.SetAbsolutePosition(xPos,yPos);
                             waterMarkContent.AddImage(image);
-                            waterMarkContent.RestoreState();
+                            //waterMarkContent.RestoreState();
                         }
                         startpage += tmp;
                     }
@@ -414,8 +443,8 @@ namespace PDFQFZ
 
                     if (yzType != 0)
                     {
-                        img = iTextSharp.text.Image.GetInstance(imgYz, System.Drawing.Imaging.ImageFormat.Bmp);//创建一个图片对象
-                        img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+                        img = iTextSharp.text.Image.GetInstance(imgYz, System.Drawing.Imaging.ImageFormat.Png);//创建一个图片对象
+                        //img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
                         //img.RotationDegrees = rotation;
 
                         if (sizeType == 0)
@@ -466,8 +495,8 @@ namespace PDFQFZ
                             int rotation = pdfReader.GetPageRotation(i);//获取指定页面的旋转度
                             iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(i);//获取当前页尺寸
 
-                            waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
-                            waterMarkContent.SetGState(state);
+                            //waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
+                            //waterMarkContent.SetGState(state);
 
                             float wbl = 0;
                             float hbl = 1;
@@ -499,7 +528,7 @@ namespace PDFQFZ
                             }
                             img.SetAbsolutePosition(xPos, yPos);
                             waterMarkContent.AddImage(img);
-                            waterMarkContent.RestoreState();
+                            //waterMarkContent.RestoreState();
 
                             //普通印章跟数字印章已经完美重叠,所以就不需要通过以下方法特殊区分了
                             //同时启用印章和数字签名的话用最后一个印章用数字签名代替
@@ -680,7 +709,7 @@ namespace PDFQFZ
             {
                 Bitmap pageImage = pdfFile.GetPageImage(i, dpi);
                 bitmaps[i] = pageImage;
-                // pageImage.Save("D:\\tmp\\img\\" + i + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                pageImage.Save("D:\\tmp\\img\\" + i + ".png", System.Drawing.Imaging.ImageFormat.Png);
             }
             pdfFile.Dispose();
 

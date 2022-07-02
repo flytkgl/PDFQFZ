@@ -95,8 +95,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="Resources\itextsharp.dll" />
     <None Include="Resources\O2S.Components.PDFRender4NET.dll" />
+    <None Include="Resources\itextsharp.dll" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
