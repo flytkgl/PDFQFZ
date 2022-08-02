@@ -72,6 +72,7 @@
             this.textOpacity = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.comboDJ = new System.Windows.Forms.ComboBox();
+            this.isSaveSources = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -493,11 +494,24 @@
             this.comboDJ.Size = new System.Drawing.Size(56, 20);
             this.comboDJ.TabIndex = 44;
             // 
+            // isSaveSources
+            // 
+            this.isSaveSources.AutoSize = true;
+            this.isSaveSources.Location = new System.Drawing.Point(184, 83);
+            this.isSaveSources.Name = "isSaveSources";
+            this.isSaveSources.Size = new System.Drawing.Size(144, 16);
+            this.isSaveSources.TabIndex = 45;
+            this.isSaveSources.Text = "保存在源文件文件夹下";
+            this.isSaveSources.UseVisualStyleBackColor = true;
+            this.isSaveSources.CheckedChanged += new System.EventHandler(this.SaveSources);
+            // 
             // Form1
             // 
+            this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.isSaveSources);
             this.Controls.Add(this.comboDJ);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.textOpacity);
@@ -598,6 +612,7 @@
         private System.Windows.Forms.TextBox textOpacity;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.ComboBox comboDJ;
+        private System.Windows.Forms.CheckBox isSaveSources;
     }
 }
 
