@@ -62,6 +62,7 @@ namespace PDFQFZ
             dtPos.Columns.Add("Page", typeof(int));
             dtPos.Columns.Add("X", typeof(float));
             dtPos.Columns.Add("Y", typeof(float));
+            isSaveSources.Enabled = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -184,13 +185,19 @@ namespace PDFQFZ
                 if (wjType == 0)
                 {
                     DirectoryInfo dir = new DirectoryInfo(sourcePath);
-                    var fileInfos = dir.GetFiles();
+                    var fileInfos = dir.GetFiles("*.pdf",SearchOption.AllDirectories);
                     foreach (var fileInfo in fileInfos)
                     {
                         if(fileInfo.Extension == ".pdf")
                         {
-                            string source = sourcePath + "\\" + fileInfo.Name;
+                            string source = fileInfo.DirectoryName + "\\" + fileInfo.Name;
                             string output = outputPath + "\\" + fileInfo.Name;
+                            if (isSaveSources.Checked == true)
+                            {
+                                output = fileInfo.DirectoryName + "\\" + Path.GetFileNameWithoutExtension(fileInfo.Name) + "_已盖章" + fileInfo.Extension;
+
+                            }
+
                             bool isSurrcess = PDFWatermark(source, output);
                             if (isSurrcess&&djType==1)
                             {
@@ -700,6 +707,37 @@ namespace PDFQFZ
 
         }
 
+        private void SaveSources(object sender, EventArgs e)
+        {
+            if (isSaveSources.Checked == true)
+            {
+                textBCpath.Enabled = false;
+                OutPath.Enabled = false;
+                if (comboType.SelectedIndex == 0 && pathText.Text != "")
+                {
+                    textBCpath.Text = pathText.Text;
+                }
+                else if (comboType.SelectedIndex == 1 && pathText.Text != "")
+                {
+                    textBCpath.Text = Path.GetDirectoryName(pathText.Text);
+                }
+            }
+            else
+            {
+                textBCpath.Enabled = true;
+                OutPath.Enabled = true;
+                if (comboType.SelectedIndex == 0 && pathText.Text != "")
+                {
+                    textBCpath.Text = pathText.Text +"\\QFZ"; ;
+                }
+                else if (comboType.SelectedIndex == 1 && pathText.Text != "")
+                {
+                    textBCpath.Text = Path.GetDirectoryName(pathText.Text) + "\\QFZ";
+                }
+            }
+
+        }
+
         public void PDFToiPDF(string pdfPath)
         {
             PDFFile pdfFile = PDFFile.Open(pdfPath);
@@ -747,7 +785,7 @@ namespace PDFQFZ
                     dt.Rows.Clear();
                     dt.Rows.Add(new object[] { "", "" });
                     DirectoryInfo dir = new DirectoryInfo(pathText.Text);
-                    var fileInfos = dir.GetFiles();
+                    var fileInfos = dir.GetFiles("*.pdf",SearchOption.AllDirectories);
                     foreach (var fileInfo in fileInfos)
                     {
                         if (fileInfo.Extension == ".pdf")
@@ -856,13 +894,15 @@ namespace PDFQFZ
             {
                 label1.Text = "请选择需要盖章的PDF文件所在目录";
                 label2.Text = "请选择PDF盖章后所保存的目录";
+                isSaveSources.Enabled = true;
             }
             else
             {
                 label1.Text = "请选择需要盖章的PDF文件(支持多选)";
                 label2.Text = "请选择PDF盖章后所保存的目录";
+                isSaveSources.Enabled = false;
+
             }
-            
         }
         //上一页
         private void buttonUp_Click(object sender, EventArgs e)
@@ -985,7 +1025,7 @@ namespace PDFQFZ
                 dt.Rows.Clear();
                 dt.Rows.Add(new object[] { "", "" });
                 DirectoryInfo dir = new DirectoryInfo(pathText.Text);
-                var fileInfos = dir.GetFiles();
+                var fileInfos = dir.GetFiles("*.pdf",SearchOption.AllDirectories);
                 foreach (var fileInfo in fileInfos)
                 {
                     if (fileInfo.Extension == ".pdf")
