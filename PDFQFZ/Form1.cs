@@ -322,25 +322,48 @@ namespace PDFQFZ
         private static Bitmap[] subImages(Bitmap img, int n)//图片分割
         {
             Bitmap[] nImage = new Bitmap[n];
-            int h = img.Height;
-            int w = img.Width;
-            int sw = w / n;
-            for (int i = 0; i < n; i++)
+            int H = img.Height;
+            int W = img.Width;
+            int w = W / n;
+            n = n - 1;
+            int tmpw = W;
+            Random random = new Random();
+            for (int i = 0; i <= n; i++)
             {
-                Bitmap newbitmap = new Bitmap(sw, h);
+                int sw;
+                if(i == n)
+                {
+                    sw = tmpw;
+                }else if(i == 0)
+                {
+                    sw =w* random.Next(11,15)/ 10;
+                }
+                else
+                {
+                    sw = w * random.Next(8, 12) / 10;
+                }
+                Bitmap newbitmap = new Bitmap(sw, H);
                 Graphics g = Graphics.FromImage(newbitmap);
-                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, sw, h), new System.Drawing.Rectangle(sw * i, 0, sw, h), GraphicsUnit.Pixel);
+                g.DrawImage(img, new System.Drawing.Rectangle(0, 0, sw, H), new System.Drawing.Rectangle(W-tmpw, 0, sw, H), GraphicsUnit.Pixel);
                 g.Dispose();
                 nImage[i] = newbitmap;
-                //newbitmap.Save("D://" + i +".png", ImageFormat.Png);//查看图片是否正常
+                //newbitmap.Save("D:\\tmp\\img\\" + i + ".png", System.Drawing.Imaging.ImageFormat.Png);//查看图片是否正常
+                tmpw = tmpw - sw;
             }
             return nImage;
         }
         //PDF盖章
         private bool PDFWatermark(string inputfilepath, string outputfilepath)
         {
-            float picbl = 1.003f;//别问我这个数值怎么来的
-            float picmm = 2.842f;//别问我这个数值怎么来的
+            float sfbl = 100f;
+            if (sizeType == 0)
+            {
+                sfbl = size * 1.003f;//别问我为什么要乘这个
+            }
+            else
+            {
+                sfbl = 100f * size * 2.842f / imgYz.Height;
+            }
 
             //PdfGState state = new PdfGState();
             //state.FillOpacity = 0.01f*opacity;//印章图片不透明度
@@ -397,26 +420,8 @@ namespace PDFQFZ
                             //image.Rotation//旋转
                             //image.ScaleToFit(140F, 320F);//设置图片的指定大小
                             //image.RotationDegrees = rotation//旋转角度
-                            float sfbl, imageW, imageH;
-                            if (sizeType == 0)
-                            {
-                                sfbl = size * picbl;//别问我为什么要乘这个
-                                image.ScalePercent(sfbl);//设置图片比例
-
-                                //imageW = image.Width * sfbl / 100f;
-                                //imageH = image.Height * sfbl / 100f;
-                                //image.ScaleToFit(imageW, imageH);//设置图片的指定大小
-                            }
-                            else
-                            {
-                                sfbl = 100f * size * picmm / (image.Width * tmp);//印章尺寸*DPI转换比例/(分割后图片的宽度*分割份数),再转百分比
-                                image.ScalePercent(sfbl);//设置图片比例
-
-                                //sfbl = size * picmm;//别问我为什么要乘这个
-                                //imageW = sfbl / tmp;
-                                //imageH = sfbl;
-                                //image.ScaleToFit(imageW, imageH);//设置图片的指定大小
-                            }
+                            float imageW, imageH;
+                            image.ScalePercent(sfbl);//设置图片比例
                             imageW = image.Width * sfbl / 100f;
                             imageH = image.Height * sfbl / 100f;
 
@@ -443,7 +448,7 @@ namespace PDFQFZ
                 if (yzType!=0|| qmType != 0)
                 {
                     iTextSharp.text.Image img = null;
-                    float sfbl=100f, imgW=0, imgH=0;
+                    float imgW=0, imgH=0;
                     float xPos=0, yPos=0;
                     bool all = false;
                     int signpage = 0;
@@ -453,24 +458,7 @@ namespace PDFQFZ
                         img = iTextSharp.text.Image.GetInstance(imgYz, System.Drawing.Imaging.ImageFormat.Png);//创建一个图片对象
                         //img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
                         //img.RotationDegrees = rotation;
-
-                        if (sizeType == 0)
-                        {
-                            sfbl = size * picbl;//别问我为什么要乘这个
-                            img.ScalePercent(sfbl);//设置图片比例
-                            //imgW = img.Width * sfbl / 100f;
-                            //imgH = img.Height * sfbl / 100f;
-                            //img.ScaleToFit(imgW, imgH);//设置图片的指定大小
-                        }
-                        else
-                        {
-                            sfbl = 100f*size * picmm / img.Width;
-                            img.ScalePercent(sfbl);//设置图片比例
-                            //sfbl = size * picmm;//别问我为什么要乘这个
-                            //imgW = sfbl;
-                            //imgH = sfbl* img.Height/ img.Width;
-                            //img.ScaleToFit(imgW, imgH);//设置图片的指定大小,实际只能指定宽度,高度还是按照图片比例计算的
-                        }
+                        img.ScalePercent(sfbl);//设置图片比例
                     }
                     imgW = img.Width * sfbl / 100f;
                     imgH = img.Height * sfbl / 100f;
