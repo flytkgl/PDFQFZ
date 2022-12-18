@@ -18,7 +18,7 @@ namespace PDFQFZ
         DataTable dt = new DataTable();//PDF列表
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
         string sourcePath = "",outputPath = "",imgPath = "",previewPath = null,signText = "", password="";
-        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, sizeType = 1, size = 40, rotation = 0, opacity = 100, wz = 50;
+        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, sizeType = 1, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250;
         Bitmap imgYz = null;
         X509Certificate2 cert = null;//证书
 
@@ -829,16 +829,20 @@ namespace PDFQFZ
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             Point pt = pictureBox1.PointToClient(Control.MousePosition);
-            int picw = pictureBox1.Width;
-            int pich = pictureBox1.Height;
+            pt.X = pt.X - yzr;
+            pt.Y = pt.Y - yzr;
+            int picw = pictureBox1.Width - 2 * yzr;
+            int pich = pictureBox1.Height - 2 * yzr;
 
+            if (pt.X < 0) pt.X = 0;
+            if (pt.Y < 0) pt.Y = 0;
             if (pt.X > picw) pt.X = picw;
             if (pt.Y > pich) pt.Y = pich;
             float px = 1f * pt.X / picw;
             float py = 1f * pt.Y / pich;
             textPx.Text = px.ToString("#0.0000");
             textPy.Text = py.ToString("#0.0000");
-            DataRow[] arrRow = dtPos.Select("Path = '"+ previewPath + "' and Page = "+ imgStartPage);
+            DataRow[] arrRow = dtPos.Select("Path = '" + previewPath + "' and Page = " + imgStartPage);
             if (arrRow == null || arrRow.Length == 0)
             {
                 dtPos.Rows.Add(new object[] { previewPath, imgStartPage, px, py });
@@ -852,10 +856,10 @@ namespace PDFQFZ
                 dr.EndEdit();
                 dtPos.AcceptChanges();
             }
-            Point pt1 = pictureBox1.Location;
 
+            Point pt1 = pictureBox1.Location;
             pictureBox2.Visible = true;
-            pictureBox2.Location = new Point(pt1.X+pt.X-10, pt1.Y + pt.Y - 10);
+            pictureBox2.Location = new Point(pt1.X + pt.X, pt1.Y + pt.Y);
 
         }
         //印章比例类型
@@ -922,11 +926,11 @@ namespace PDFQFZ
                     px = Convert.ToSingle(dr["X"].ToString());
                     py = Convert.ToSingle(dr["Y"].ToString());
                 }
-                int X = Convert.ToInt32(pictureBox1.Width*px);
-                int Y = Convert.ToInt32(pictureBox1.Height*py);
+                int X = Convert.ToInt32((pictureBox1.Width - 2 * yzr) * px);
+                int Y = Convert.ToInt32((pictureBox1.Height - 2 * yzr) * py);
                 Point pt1 = pictureBox1.Location;
 
-                pictureBox2.Location = new Point(pt1.X + X - 10, pt1.Y + Y - 10);
+                pictureBox2.Location = new Point(pt1.X + X, pt1.Y + Y);
 
             }
         }
@@ -960,11 +964,11 @@ namespace PDFQFZ
                     px = Convert.ToSingle(dr["X"].ToString());
                     py = Convert.ToSingle(dr["Y"].ToString());
                 }
-                int X = Convert.ToInt32(pictureBox1.Width * px);
-                int Y = Convert.ToInt32(pictureBox1.Height * py);
+                int X = Convert.ToInt32((pictureBox1.Width - 2 * yzr) * px);
+                int Y = Convert.ToInt32((pictureBox1.Height - 2 * yzr) * py);
                 Point pt1 = pictureBox1.Location;
 
-                pictureBox2.Location = new Point(pt1.X + X - 10, pt1.Y + Y - 10);
+                pictureBox2.Location = new Point(pt1.X + X, pt1.Y + Y);
 
             }
         }
@@ -1142,6 +1146,18 @@ namespace PDFQFZ
             {
                 PDFFile pdfFile = PDFFile.Open(previewPath);
                 Bitmap pageImage = pdfFile.GetPageImage(0, 56 * 1);
+                Point point = new Point(pictureBox1.Location.X + pictureBox1.Width / 2, pictureBox1.Location.Y + pictureBox1.Height / 2);
+                if (pageImage.Width < pageImage.Height)
+                {
+                    pictureBox1.Height = maximg;
+                    pictureBox1.Width = pictureBox1.Height * pageImage.Width / pageImage.Height;
+                }
+                else
+                {
+                    pictureBox1.Width = maximg;
+                    pictureBox1.Height = pictureBox1.Width * pageImage.Height / pageImage.Width;
+                }
+                pictureBox1.Location = new Point(point.X - pictureBox1.Width / 2, point.Y - pictureBox1.Height / 2);
                 pictureBox1.Image = pageImage;
                 imgStartPage = 1;
                 imgPageCount = pdfFile.PageCount;
@@ -1161,11 +1177,11 @@ namespace PDFQFZ
                     px = Convert.ToSingle(dr["X"].ToString());
                     py = Convert.ToSingle(dr["Y"].ToString());
                 }
-                int X = Convert.ToInt32(pictureBox1.Width * px);
-                int Y = Convert.ToInt32(pictureBox1.Height * py);
+                int X = Convert.ToInt32((pictureBox1.Width - 2 * yzr) * px);
+                int Y = Convert.ToInt32((pictureBox1.Height - 2 * yzr) * py);
                 Point pt1 = pictureBox1.Location;
 
-                pictureBox2.Location = new Point(pt1.X + X - 10, pt1.Y + Y - 10);
+                pictureBox2.Location = new Point(pt1.X + X, pt1.Y + Y);
             }
             else
             {
