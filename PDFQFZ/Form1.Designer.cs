@@ -34,7 +34,6 @@
             this.pathText = new System.Windows.Forms.TextBox();
             this.SelectPath = new System.Windows.Forms.Button();
             this.textBCpath = new System.Windows.Forms.TextBox();
-            this.textGZpath = new System.Windows.Forms.TextBox();
             this.OutPath = new System.Windows.Forms.Button();
             this.GzPath = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -73,6 +72,7 @@
             this.label12 = new System.Windows.Forms.Label();
             this.comboDJ = new System.Windows.Forms.ComboBox();
             this.isSaveSources = new System.Windows.Forms.CheckBox();
+            this.comboBoxYz = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -116,17 +116,6 @@
             this.textBCpath.Size = new System.Drawing.Size(338, 21);
             this.textBCpath.TabIndex = 3;
             // 
-            // textGZpath
-            // 
-            this.textGZpath.AllowDrop = true;
-            this.textGZpath.Location = new System.Drawing.Point(96, 144);
-            this.textGZpath.Name = "textGZpath";
-            this.textGZpath.ReadOnly = true;
-            this.textGZpath.Size = new System.Drawing.Size(339, 21);
-            this.textGZpath.TabIndex = 4;
-            this.textGZpath.DragDrop += new System.Windows.Forms.DragEventHandler(this.textGZpath_DragDrop);
-            this.textGZpath.DragEnter += new System.Windows.Forms.DragEventHandler(this.textGZpath_DragEnter);
-            // 
             // OutPath
             // 
             this.OutPath.Location = new System.Drawing.Point(12, 99);
@@ -139,11 +128,11 @@
             // 
             // GzPath
             // 
-            this.GzPath.Location = new System.Drawing.Point(12, 143);
+            this.GzPath.Location = new System.Drawing.Point(360, 142);
             this.GzPath.Name = "GzPath";
             this.GzPath.Size = new System.Drawing.Size(75, 23);
             this.GzPath.TabIndex = 6;
-            this.GzPath.Text = "选择";
+            this.GzPath.Text = "导入";
             this.GzPath.UseVisualStyleBackColor = true;
             this.GzPath.Click += new System.EventHandler(this.GzPath_Click);
             // 
@@ -505,12 +494,25 @@
             this.isSaveSources.UseVisualStyleBackColor = true;
             this.isSaveSources.CheckedChanged += new System.EventHandler(this.SaveSources);
             // 
+            // comboBoxYz
+            // 
+            this.comboBoxYz.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxYz.FormattingEnabled = true;
+            this.comboBoxYz.Items.AddRange(new object[] {
+            "目录模式",
+            "文件模式"});
+            this.comboBoxYz.Location = new System.Drawing.Point(12, 144);
+            this.comboBoxYz.Name = "comboBoxYz";
+            this.comboBoxYz.Size = new System.Drawing.Size(342, 20);
+            this.comboBoxYz.TabIndex = 46;
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.comboBoxYz);
             this.Controls.Add(this.isSaveSources);
             this.Controls.Add(this.comboDJ);
             this.Controls.Add(this.label11);
@@ -549,7 +551,6 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.GzPath);
             this.Controls.Add(this.OutPath);
-            this.Controls.Add(this.textGZpath);
             this.Controls.Add(this.textBCpath);
             this.Controls.Add(this.SelectPath);
             this.Controls.Add(this.pathText);
@@ -558,7 +559,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.13";
+            this.Text = "PDF加盖骑缝章 V1.14";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -574,7 +575,6 @@
         private System.Windows.Forms.TextBox pathText;
         private System.Windows.Forms.Button SelectPath;
         private System.Windows.Forms.TextBox textBCpath;
-        private System.Windows.Forms.TextBox textGZpath;
         private System.Windows.Forms.Button OutPath;
         private System.Windows.Forms.Button GzPath;
         private System.Windows.Forms.Label label1;
@@ -613,6 +613,7 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.ComboBox comboDJ;
         private System.Windows.Forms.CheckBox isSaveSources;
+        private System.Windows.Forms.ComboBox comboBoxYz;
     }
 }
 

@@ -15,8 +15,10 @@ namespace PDFQFZ
     {
         int fw, fh,imgStartPage=0, imgPageCount=0;
         string certDefaultPath = $@"{Application.StartupPath}\pdfqfz.pfx";//证书默认存放地址
+        string yzLog = $@"{Application.StartupPath}\yz.log";//获取印章记录
         DataTable dt = new DataTable();//PDF列表
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
+        DataTable dtYz = new DataTable();//PDF列表
         string sourcePath = "",outputPath = "",imgPath = "",previewPath = null,signText = "", password="";
         int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, sizeType = 1, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250;
         Bitmap imgYz = null;
@@ -53,6 +55,29 @@ namespace PDFQFZ
             comboBoxBL.SelectedIndex = sizeType;
             fw = this.Width;
             fh = this.Height;
+            dtYz.Columns.Add("Name", typeof(string));
+            dtYz.Columns.Add("Value", typeof(string));
+            comboBoxYz.DisplayMember = "Name";
+            comboBoxYz.ValueMember = "Value";
+            comboBoxYz.DataSource = dtYz;
+            if (!File.Exists(yzLog))
+            {
+                File.Create(yzLog).Close();
+            }
+            else
+            {
+                string line;
+                string filename;
+                StreamReader sr = new StreamReader(yzLog, false);
+                while ((line = sr.ReadLine()) != null)
+                {
+                    Console.WriteLine(line);
+                    filename = System.IO.Path.GetFileName(line);//文件名
+                    dtYz.Rows.Add(new object[] { filename, line });
+                }
+                sr.Close();
+                sr.Dispose();
+            }
             dt.Columns.Add("Name", typeof(string));
             dt.Columns.Add("Value", typeof(string));
             comboPDFlist.DisplayMember = "Name";
@@ -86,7 +111,7 @@ namespace PDFQFZ
             {
                 sourcePath = pathText.Text;
                 outputPath = textBCpath.Text;
-                imgPath = textGZpath.Text;
+                imgPath = comboBoxYz.SelectedValue.ToString();
                 signText = textname.Text;
                 password = textpass.Text;
 
@@ -194,7 +219,7 @@ namespace PDFQFZ
                             string output = outputPath + "\\" + fileInfo.Name;
                             if (isSaveSources.Checked == true)
                             {
-                                output = fileInfo.DirectoryName + "\\" + Path.GetFileNameWithoutExtension(fileInfo.Name) + "_已盖章" + fileInfo.Extension;
+                                output = fileInfo.DirectoryName + "\\" + System.IO.Path.GetFileNameWithoutExtension(fileInfo.Name) + "_已盖章" + fileInfo.Extension;
 
                             }
 
@@ -221,7 +246,7 @@ namespace PDFQFZ
                     {
                         string filename = System.IO.Path.GetFileName(file);//文件名
                         string output = outputPath + "\\" + filename;//输出文件的绝对路径
-                        if (outputPath == Path.GetDirectoryName(file))
+                        if (outputPath == System.IO.Path.GetDirectoryName(file))
                         {
                             output = outputPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(file) + "_QFZ.pdf";//如果跟源文件在同一个目录需要重命名
                         }
@@ -707,7 +732,7 @@ namespace PDFQFZ
                 }
                 else if (comboType.SelectedIndex == 1 && pathText.Text != "")
                 {
-                    textBCpath.Text = Path.GetDirectoryName(pathText.Text);
+                    textBCpath.Text = System.IO.Path.GetDirectoryName(pathText.Text);
                 }
             }
             else
@@ -720,7 +745,7 @@ namespace PDFQFZ
                 }
                 else if (comboType.SelectedIndex == 1 && pathText.Text != "")
                 {
-                    textBCpath.Text = Path.GetDirectoryName(pathText.Text) + "\\QFZ";
+                    textBCpath.Text = System.IO.Path.GetDirectoryName(pathText.Text) + "\\QFZ";
                 }
             }
 
@@ -793,7 +818,7 @@ namespace PDFQFZ
                     pathText.Text = string.Join(",", file.FileNames);
                     if (textBCpath.Text == "")
                     {
-                        textBCpath.Text = Path.GetDirectoryName(file.FileName);
+                        textBCpath.Text = System.IO.Path.GetDirectoryName(file.FileName);
                     }
                     dt.Rows.Clear();
                     dt.Rows.Add(new object[] { "", "" });
@@ -820,9 +845,19 @@ namespace PDFQFZ
         {
             OpenFileDialog file = new OpenFileDialog();
             file.Filter = "图片文件|*.jpg;*.png";
+            file.Multiselect = true;
             if (file.ShowDialog() == DialogResult.OK)
             {
-                textGZpath.Text = file.FileName;
+                string filename;
+                StreamWriter sw = File.AppendText(yzLog);
+                foreach (string filePath in file.FileNames)
+                {
+                    filename = System.IO.Path.GetFileName(filePath);//文件名
+                    dtYz.Rows.Add(new object[] { filename, filePath });
+                    sw.WriteLine(filePath);
+                }
+                sw.Close();
+                sw.Dispose();
             }
         }
         //预览图定位
@@ -1057,30 +1092,6 @@ namespace PDFQFZ
                 }
             }
             
-        }
-
-        private void textGZpath_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effect = DragDropEffects.All;//调用DragDrop事件
-            }
-            else
-            {
-                e.Effect = DragDropEffects.None;
-            }
-        }
-
-        private void textGZpath_DragDrop(object sender, DragEventArgs e)
-        {
-            string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop);//拖放的多个文件的路径列表
-
-            string extension = System.IO.Path.GetExtension(filePaths[0]);//文件后缀名
-            if ((extension == ".gif") || (extension == ".bmp") || (extension == ".png") || (extension == ".jpg") || (extension == ".jpeg"))
-            {
-                //todo you code
-                this.textGZpath.Text = filePaths[0];
-            }
         }
 
 
