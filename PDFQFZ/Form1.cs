@@ -484,9 +484,9 @@ namespace PDFQFZ
                         //img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
                         //img.RotationDegrees = rotation;
                         img.ScalePercent(sfbl);//设置图片比例
+                        imgW = img.Width * sfbl / 100f;
+                        imgH = img.Height * sfbl / 100f;
                     }
-                    imgW = img.Width * sfbl / 100f;
-                    imgH = img.Height * sfbl / 100f;
 
                     if (yzType == 1)
                     {

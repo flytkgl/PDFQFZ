@@ -172,8 +172,7 @@
             this.log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.log.Size = new System.Drawing.Size(423, 121);
             this.log.TabIndex = 10;
-            this.log.Text = "提示:印章图片默认是72dpi(那40mm印章对应的像素就是113),打印效果会很模糊,建议使用300dpi以上的印章图片然后调整印章比例,如300dpi(40m" +
-    "m印章对应像素472)对应的比例是72/300=24%,所以比例直接填写24即可";
+            this.log.Text = "提示:使用合并模式会导致文字不可编辑,并且原数字签名丢失";
             // 
             // comboYz
             // 
@@ -559,7 +558,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.14";
+            this.Text = "PDF加盖骑缝章 V1.15";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
