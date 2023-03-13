@@ -635,7 +635,7 @@ namespace PDFQFZ
                             //signatureAppearance.Layer2Text = text;
 
                             float bk = 2;//数字签名的图片要加上边框才能跟普通印章的位置完全一致
-                            signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(xPos- bk, yPos- bk, xPos + imgW + bk, yPos + imgH + bk), signpage, "Signature");
+                            signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(xPos- bk, yPos- bk, xPos + imgW + bk, yPos + imgH + bk), signpage, null);
                         }
 
                         MakeSignature.SignDetached(signatureAppearance, externalSignature, chain, null, null, null, 0, CryptoStandard.CMS);
