@@ -172,7 +172,7 @@
             this.log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.log.Size = new System.Drawing.Size(423, 121);
             this.log.TabIndex = 10;
-            this.log.Text = "提示:使用合并模式会导致文字不可编辑,并且原数字签名丢失";
+            this.log.Text = "提示:使用合并模式会导致文字不可编辑,并且原数字签名丢失.随意骑缝章和自定义加印章共用右边的预览定位,所以同时使用的时候会冲突,建议分开盖章";
             // 
             // comboYz
             // 
@@ -301,11 +301,15 @@
             this.comboQfz.FormattingEnabled = true;
             this.comboQfz.Items.AddRange(new object[] {
             "加盖骑缝章",
-            "不加骑缝章"});
+            "不加骑缝章",
+            "单页骑缝章",
+            "双页骑缝章",
+            "随意骑缝章"});
             this.comboQfz.Location = new System.Drawing.Point(100, 12);
             this.comboQfz.Name = "comboQfz";
             this.comboQfz.Size = new System.Drawing.Size(90, 20);
             this.comboQfz.TabIndex = 27;
+            this.comboQfz.SelectionChangeCommitted += new System.EventHandler(this.comboQfz_SelectionChangeCommitted);
             // 
             // comboQmtype
             // 
@@ -558,7 +562,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.15";
+            this.Text = "PDF加盖骑缝章 V1.16";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

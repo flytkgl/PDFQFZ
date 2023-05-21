@@ -8,6 +8,8 @@ using iTextSharp.text.pdf.security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using O2S.Components.PDFRender4NET;
+using System.Collections.Generic;
+using iTextSharp.text;
 
 namespace PDFQFZ
 {
@@ -19,7 +21,7 @@ namespace PDFQFZ
         DataTable dt = new DataTable();//PDF列表
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
         DataTable dtYz = new DataTable();//PDF列表
-        string sourcePath = "",outputPath = "",imgPath = "",previewPath = null,signText = "", password="";
+        string sourcePath = "",outputPath = "",imgPath = "",previewPath = "",signText = "", password="";
         int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, sizeType = 1, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250;
         Bitmap imgYz = null;
         X509Certificate2 cert = null;//证书
@@ -274,7 +276,7 @@ namespace PDFQFZ
             }
         }
         //设置图片透明度
-        private Bitmap SetImageOpacity(Image srcImage, int opacity)
+        private Bitmap SetImageOpacity(System.Drawing.Image srcImage, int opacity)
         {
             opacity = opacity * 255/100;
             Bitmap pic = new Bitmap(srcImage);
@@ -299,7 +301,7 @@ namespace PDFQFZ
             return pic;
         }
         //旋转图片
-        public Bitmap RotateImg(Image b, int angle)
+        public Bitmap RotateImg(System.Drawing.Image b, int angle)
         {
             angle = angle % 360;
             //弧度转换 
@@ -326,7 +328,7 @@ namespace PDFQFZ
             //计算偏移量 
             Point Offset = new Point((W - w) / 2, (H - h) / 2);
             //构造图像显示区域:让图像的中心与窗口的中心点一致 
-            Rectangle rect = new Rectangle(Offset.X, Offset.Y, w, h);
+            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(Offset.X, Offset.Y, w, h);
             Point center = new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
             g.TranslateTransform(center.X, center.Y);
             g.RotateTransform(angle);
@@ -377,6 +379,7 @@ namespace PDFQFZ
             }
             return nImage;
         }
+
         //PDF盖章
         private bool PDFWatermark(string inputfilepath, string outputfilepath)
         {
@@ -410,19 +413,62 @@ namespace PDFQFZ
                 }
                 
                 int numberOfPages = pdfReader.NumberOfPages;//pdf页数
+                int qfzPages = 0;
+                List<int> qfzList = new List<int>();
+                if (qfzType == 0)
+                {
+                    for (int i = 1; i <= numberOfPages; i ++)
+                    {
+                        qfzList.Add(i);
+                        qfzPages++;
+                    }
+                }
+                else if(qfzType == 2)
+                {
+                    for (int i = 1; i <= numberOfPages; i += 2)
+                    {
+                        qfzList.Add(i);
+                        qfzPages++;
+                    }
+                }
+                else if(qfzType == 3)
+                {
+                    for (int i = 2; i <= numberOfPages; i += 2)
+                    {
+                        qfzList.Add(i);
+                        qfzPages++;
+                    }
+                }
+                else if(qfzType == 4)
+                {
+                    // 遍历 DataTable 的所有行
+                    foreach (DataRow row in dtPos.Rows)
+                    {
+                        if (row["Path"].ToString()== inputfilepath)
+                        {
+                            // 获取当前行的某一列的值，假设这一列的列名为 "ColumnName"
+                            int columnValue = Convert.ToInt32(row["Page"]);
+
+                            // 将获取的值添加到列表中
+                            qfzList.Add(columnValue);
+                            qfzPages++;
+                        }
+                    }
+                    qfzList.Sort();
+                }
                 
                 PdfContentByte waterMarkContent;
 
-                if(qfzType == 0&& numberOfPages > 1)
+                if(qfzType != 1&& qfzPages > 1)
                 {
                     int max = 20;//骑缝章最大分割数
-                    int ss = numberOfPages / max + 1;
-                    int sy = numberOfPages - ss * max / 2;
+                    int ss = qfzPages / max + 1;
+                    int sy = qfzPages - ss * max / 2;
                     int sys = sy / ss;
                     int syy = sy % ss;
                     int pp = max / 2 + sys;
                     Bitmap[] nImage;
-                    int startpage = 0;
+                    int startIndex = 0;
                     for (int i = 0; i < ss; i++)
                     {
                         int tmp = pp;
@@ -431,20 +477,20 @@ namespace PDFQFZ
                             tmp++;
                         }
                         nImage = subImages(imgYz, tmp);
-                        for (int x =  1; x <= tmp; x++)
+                        for (int y = 0; y < tmp; y++)
                         {
-                            int page = startpage + x;
+                            int page = qfzList[startIndex + y];
                             waterMarkContent = pdfStamper.GetOverContent(page);//获取当前页内容
                             int rotation = pdfReader.GetPageRotation(page);//获取当前页的旋转度
                             iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(page);//获取当前页尺寸
-                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[x - 1], System.Drawing.Imaging.ImageFormat.Png);//获取骑缝章对应页的部分
-                            //image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
-                            //waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
-                            //waterMarkContent.SetGState(state);
-                            //image.GrayFill = 20;//透明度，灰色填充
-                            //image.Rotation//旋转
-                            //image.ScaleToFit(140F, 320F);//设置图片的指定大小
-                            //image.RotationDegrees = rotation//旋转角度
+                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[y], System.Drawing.Imaging.ImageFormat.Png);//获取骑缝章对应页的部分
+                                                                                                                                                   //image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
+                                                                                                                                                   //waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
+                                                                                                                                                   //waterMarkContent.SetGState(state);
+                                                                                                                                                   //image.GrayFill = 20;//透明度，灰色填充
+                                                                                                                                                   //image.Rotation//旋转
+                                                                                                                                                   //image.ScaleToFit(140F, 320F);//设置图片的指定大小
+                                                                                                                                                   //image.RotationDegrees = rotation//旋转角度
                             float imageW, imageH;
                             image.ScalePercent(sfbl);//设置图片比例
                             imageW = image.Width * sfbl / 100f;
@@ -462,11 +508,11 @@ namespace PDFQFZ
                                 xPos = psize.Width - imageW;
                                 yPos = (psize.Height - imageH) * (100 - wz) / 100;
                             }
-                            image.SetAbsolutePosition(xPos,yPos);
+                            image.SetAbsolutePosition(xPos, yPos);
                             waterMarkContent.AddImage(image);
                             //waterMarkContent.RestoreState();
                         }
-                        startpage += tmp;
+                        startIndex += tmp;
                     }
                 }
 
@@ -934,7 +980,7 @@ namespace PDFQFZ
         //上一页
         private void buttonUp_Click(object sender, EventArgs e)
         {
-            if (previewPath != null&&imgStartPage > 1)
+            if (previewPath != ""&&imgStartPage > 1)
             {
                 imgStartPage--;
                 PDFFile pdfFile = PDFFile.Open(previewPath);
@@ -947,7 +993,7 @@ namespace PDFQFZ
                 DataRow[] arrRow = dtPos.Select("Path = '" + previewPath + "' and Page = " + imgStartPage);
                 if (arrRow == null || arrRow.Length == 0)
                 {
-                    if (comboYz.SelectedIndex == 4)
+                    if (comboYz.SelectedIndex == 4 || comboQfz.SelectedIndex == 4)
                     {
                         pictureBox2.Visible = false;
                     }
@@ -972,7 +1018,7 @@ namespace PDFQFZ
         //下一页
         private void buttonNext_Click(object sender, EventArgs e)
         {
-            if (previewPath != null&&imgStartPage < imgPageCount)
+            if (previewPath != ""&&imgStartPage < imgPageCount)
             {
                 imgStartPage++;
                 PDFFile pdfFile = PDFFile.Open(previewPath);
@@ -985,7 +1031,7 @@ namespace PDFQFZ
                 DataRow[] arrRow = dtPos.Select("Path = '" + previewPath + "' and Page = " + imgStartPage);
                 if (arrRow == null || arrRow.Length == 0)
                 {
-                    if (comboYz.SelectedIndex == 4)
+                    if (comboYz.SelectedIndex == 4 || comboQfz.SelectedIndex == 4)
                     {
                         pictureBox2.Visible = false;
                     }
@@ -1179,6 +1225,10 @@ namespace PDFQFZ
                 DataRow[] arrRow = dtPos.Select("Path = '" + previewPath + "' and Page = " + imgStartPage);
                 if (arrRow == null || arrRow.Length == 0)
                 {
+                    if (comboYz.SelectedIndex == 4 || comboQfz.SelectedIndex == 4)
+                    {
+                        pictureBox2.Visible = false;
+                    }
                     px = Convert.ToSingle(textPx.Text);//这里根据比例来定位
                     py = Convert.ToSingle(textPy.Text);//这里根据比例来定位
                 }
@@ -1201,7 +1251,7 @@ namespace PDFQFZ
                 labelPage.Text = "1/1";
                 Bitmap bmp = new Bitmap(177, 250);
                 Graphics g = Graphics.FromImage(bmp);
-                g.FillRectangle(Brushes.White, new Rectangle(0, 0, 177, 250));
+                g.FillRectangle(Brushes.White, new System.Drawing.Rectangle(0, 0, 177, 250));
                 g.Dispose();
                 pictureBox1.Image = bmp;
             }
@@ -1210,7 +1260,20 @@ namespace PDFQFZ
         //根据印章类型切换窗口大小
         private void comboYz_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            if (comboYz.SelectedIndex != 0)
+            if (comboYz.SelectedIndex != 0 || comboQfz.SelectedIndex == 4)
+            {
+                this.Size = new Size(fw + 267, fh);
+            }
+            else
+            {
+                this.Size = new Size(fw, fh);
+            }
+        }
+
+
+        private void comboQfz_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            if (comboYz.SelectedIndex != 0 || comboQfz.SelectedIndex == 4)
             {
                 this.Size = new Size(fw + 267, fh);
             }
