@@ -22,7 +22,7 @@ namespace PDFQFZ
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
         DataTable dtYz = new DataTable();//PDF列表
         string sourcePath = "",outputPath = "",imgPath = "",previewPath = "",signText = "", password="";
-        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, sizeType = 1, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250;
+        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250;
         Bitmap imgYz = null;
         X509Certificate2 cert = null;//证书
 
@@ -54,7 +54,7 @@ namespace PDFQFZ
             comboYz.SelectedIndex = yzType;
             comboDJ.SelectedIndex = djType;
             comboQmtype.SelectedIndex = qmType;
-            comboBoxBL.SelectedIndex = sizeType;
+            comboBoxWZ.SelectedIndex = wzType;
             fw = this.Width;
             fh = this.Height;
             dtYz.Columns.Add("Name", typeof(string));
@@ -99,7 +99,7 @@ namespace PDFQFZ
             yzType = comboYz.SelectedIndex;
             djType = comboDJ.SelectedIndex;
             qmType = comboQmtype.SelectedIndex;
-            sizeType = comboBoxBL.SelectedIndex;
+            wzType = comboBoxWZ.SelectedIndex;
 
             if (qfzType == 1&& yzType == 0 && qmType == 0)
             {
@@ -119,7 +119,11 @@ namespace PDFQFZ
 
                 if (sourcePath != "" && outputPath != "" && (imgPath != "" || qfzType == 1 && yzType == 0))
                 {
-                    if (!int.TryParse(textBili.Text, out size) || (sizeType == 0 && size > 100))
+                    if (!File.Exists(imgPath))
+                    {
+                        MessageBox.Show("印章文件读取失败,请重新导入印章。");
+                    }
+                    else if (!int.TryParse(textCC.Text, out size) || size > 100)
                     {
                         MessageBox.Show("印章尺寸设置错误,请输入正确的比例或尺寸。");
                     }
@@ -301,7 +305,7 @@ namespace PDFQFZ
             return pic;
         }
         //旋转图片
-        public Bitmap RotateImg(System.Drawing.Image b, int angle)
+        public Bitmap RotateImg(System.Drawing.Image b, int angle,bool original = true)
         {
             angle = angle % 360;
             //弧度转换 
@@ -314,10 +318,12 @@ namespace PDFQFZ
             int W = (int)(Math.Max(Math.Abs(w * cos - h * sin), Math.Abs(w * cos + h * sin)));
             int H = (int)(Math.Max(Math.Abs(w * sin - h * cos), Math.Abs(w * sin + h * cos)));
 
-
-            //为了尽可能的去除白边,减小印章旋转后尺寸的误差,这里保持原印章宽度,切掉部分角
-            H = H * w / W;
-            W = w;
+            if (original)
+            {
+                //为了尽可能的去除白边,减小印章旋转后尺寸的误差,这里保持原印章宽度,切掉部分角
+                H = H * w / W;
+                W = w;
+            }
 
 
             //目标位图 
@@ -340,7 +346,7 @@ namespace PDFQFZ
             g.Save();
             g.Dispose();
             //保存旋转后的图片 
-            //dsImage.Save(filename, System.Drawing.Imaging.ImageFormat.Png);
+            //dsImage.Save("D:\\tmp\\img\\tmp.png", System.Drawing.Imaging.ImageFormat.Png);
 
             return dsImage;
         }
@@ -383,15 +389,7 @@ namespace PDFQFZ
         //PDF盖章
         private bool PDFWatermark(string inputfilepath, string outputfilepath)
         {
-            float sfbl = 100f;
-            if (sizeType == 0)
-            {
-                sfbl = size * 1.003f;//别问我为什么要乘这个
-            }
-            else
-            {
-                sfbl = 100f * size * 2.842f / imgYz.Height;
-            }
+            float sfbl = 100f * size * 2.842f / imgYz.Height;
 
             //PdfGState state = new PdfGState();
             //state.FillOpacity = 0.01f*opacity;//印章图片不透明度
@@ -483,7 +481,27 @@ namespace PDFQFZ
                             waterMarkContent = pdfStamper.GetOverContent(page);//获取当前页内容
                             int rotation = pdfReader.GetPageRotation(page);//获取当前页的旋转度
                             iTextSharp.text.Rectangle psize = pdfReader.GetPageSize(page);//获取当前页尺寸
-                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(nImage[y], System.Drawing.Imaging.ImageFormat.Png);//获取骑缝章对应页的部分
+                            float pWidth, pHeight;
+                            if (rotation == 90 || rotation == 270)
+                            {
+                                pWidth = psize.Height;
+                                pHeight = psize.Width;
+                            }
+                            else
+                            {
+                                pWidth = psize.Width;
+                                pHeight = psize.Height;
+                            }
+                            Bitmap qfzImage = null;
+                            if(wzType == 3|| wzType == 2)
+                            {
+                                qfzImage = nImage[y];
+                            }
+                            else if (wzType == 1|| wzType == 0)
+                            {
+                                qfzImage = RotateImg(nImage[y], 90, false);
+                            }
+                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(qfzImage, System.Drawing.Imaging.ImageFormat.Png);//获取骑缝章对应页的部分
                                                                                                                                                    //image.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
                                                                                                                                                    //waterMarkContent.SaveState();//通过PdfGState调整图片整体的透明度
                                                                                                                                                    //waterMarkContent.SetGState(state);
@@ -497,16 +515,26 @@ namespace PDFQFZ
                             imageH = image.Height * sfbl / 100f;
 
                             //水印的位置
-                            float xPos, yPos;
-                            if (rotation == 90 || rotation == 270)
+                            float xPos=0, yPos=0;
+                            if (wzType == 3)
                             {
-                                xPos = psize.Height - imageW;
-                                yPos = (psize.Width - imageH) * (100 - wz) / 100;
+                                xPos = pWidth - imageW;
+                                yPos = (pHeight - imageH) * (100 - wz) / 100;
                             }
-                            else
+                            else if (wzType == 2)
                             {
-                                xPos = psize.Width - imageW;
-                                yPos = (psize.Height - imageH) * (100 - wz) / 100;
+                                xPos = 0;
+                                yPos = (pHeight - imageH) * (100 - wz) / 100;
+                            }
+                            else if (wzType == 1)
+                            {
+                                xPos = (pWidth - imageW) * wz / 100;
+                                yPos = 0;
+                            }
+                            else if (wzType == 0)
+                            {
+                                xPos = (pWidth - imageW) * wz / 100;
+                                yPos = pHeight - imageH;
                             }
                             image.SetAbsolutePosition(xPos, yPos);
                             waterMarkContent.AddImage(image);
@@ -942,20 +970,6 @@ namespace PDFQFZ
             pictureBox2.Visible = true;
             pictureBox2.Location = new Point(pt1.X + pt.X, pt1.Y + pt.Y);
 
-        }
-        //印章比例类型
-        private void comboBoxBL_SelectionChangeCommitted(object sender, EventArgs e)
-        {
-            if (comboBoxBL.SelectedIndex != 0)
-            {
-                label7.Text = "mm";
-                textBili.Text = "40";
-            }
-            else
-            {
-                label7.Text = "%";
-                textBili.Text = "100";
-            }
         }
         //文件/目录模式切换
         private void comboType_SelectionChangeCommitted(object sender, EventArgs e)

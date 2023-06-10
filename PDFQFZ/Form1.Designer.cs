@@ -45,9 +45,9 @@
             this.textPx = new System.Windows.Forms.TextBox();
             this.textPy = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.textBili = new System.Windows.Forms.TextBox();
+            this.textCC = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.comboBoxBL = new System.Windows.Forms.ComboBox();
+            this.comboBoxWZ = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.textWzbl = new System.Windows.Forms.TextBox();
@@ -73,6 +73,7 @@
             this.comboDJ = new System.Windows.Forms.ComboBox();
             this.isSaveSources = new System.Windows.Forms.CheckBox();
             this.comboBoxYz = new System.Windows.Forms.ComboBox();
+            this.label13 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -226,40 +227,41 @@
             this.label5.TabIndex = 17;
             this.label5.Text = "Y:";
             // 
-            // textBili
+            // textCC
             // 
-            this.textBili.Location = new System.Drawing.Point(96, 199);
-            this.textBili.Name = "textBili";
-            this.textBili.Size = new System.Drawing.Size(23, 21);
-            this.textBili.TabIndex = 19;
-            this.textBili.Text = "40";
+            this.textCC.Location = new System.Drawing.Point(45, 199);
+            this.textCC.Name = "textCC";
+            this.textCC.Size = new System.Drawing.Size(23, 21);
+            this.textCC.TabIndex = 19;
+            this.textCC.Text = "40";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(125, 202);
+            this.label7.Location = new System.Drawing.Point(74, 202);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(17, 12);
             this.label7.TabIndex = 20;
             this.label7.Text = "mm";
             // 
-            // comboBoxBL
+            // comboBoxWZ
             // 
-            this.comboBoxBL.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxBL.FormattingEnabled = true;
-            this.comboBoxBL.Items.AddRange(new object[] {
-            "印章比例",
-            "印章尺寸"});
-            this.comboBoxBL.Location = new System.Drawing.Point(13, 199);
-            this.comboBoxBL.Name = "comboBoxBL";
-            this.comboBoxBL.Size = new System.Drawing.Size(74, 20);
-            this.comboBoxBL.TabIndex = 22;
-            this.comboBoxBL.SelectionChangeCommitted += new System.EventHandler(this.comboBoxBL_SelectionChangeCommitted);
+            this.comboBoxWZ.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxWZ.FormattingEnabled = true;
+            this.comboBoxWZ.Items.AddRange(new object[] {
+            "上",
+            "下",
+            "左",
+            "右"});
+            this.comboBoxWZ.Location = new System.Drawing.Point(342, 200);
+            this.comboBoxWZ.Name = "comboBoxWZ";
+            this.comboBoxWZ.Size = new System.Drawing.Size(44, 20);
+            this.comboBoxWZ.TabIndex = 22;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(323, 203);
+            this.label6.Location = new System.Drawing.Point(271, 203);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(65, 12);
             this.label6.TabIndex = 23;
@@ -424,7 +426,7 @@
             // 
             // textRotation
             // 
-            this.textRotation.Location = new System.Drawing.Point(181, 200);
+            this.textRotation.Location = new System.Drawing.Point(130, 200);
             this.textRotation.Name = "textRotation";
             this.textRotation.Size = new System.Drawing.Size(23, 21);
             this.textRotation.TabIndex = 39;
@@ -433,7 +435,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(148, 204);
+            this.label10.Location = new System.Drawing.Point(97, 204);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(29, 12);
             this.label10.TabIndex = 38;
@@ -442,7 +444,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(210, 204);
+            this.label9.Location = new System.Drawing.Point(159, 204);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(17, 12);
             this.label9.TabIndex = 40;
@@ -451,7 +453,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(303, 204);
+            this.label11.Location = new System.Drawing.Point(252, 204);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(11, 12);
             this.label11.TabIndex = 43;
@@ -459,7 +461,7 @@
             // 
             // textOpacity
             // 
-            this.textOpacity.Location = new System.Drawing.Point(274, 200);
+            this.textOpacity.Location = new System.Drawing.Point(223, 200);
             this.textOpacity.Name = "textOpacity";
             this.textOpacity.Size = new System.Drawing.Size(23, 21);
             this.textOpacity.TabIndex = 42;
@@ -468,7 +470,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(228, 204);
+            this.label12.Location = new System.Drawing.Point(177, 204);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(41, 12);
             this.label12.TabIndex = 41;
@@ -509,12 +511,22 @@
             this.comboBoxYz.Size = new System.Drawing.Size(342, 20);
             this.comboBoxYz.TabIndex = 46;
             // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(12, 204);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(29, 12);
+            this.label13.TabIndex = 47;
+            this.label13.Text = "尺寸";
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.label13);
             this.Controls.Add(this.comboBoxYz);
             this.Controls.Add(this.isSaveSources);
             this.Controls.Add(this.comboDJ);
@@ -539,9 +551,9 @@
             this.Controls.Add(this.label8);
             this.Controls.Add(this.textWzbl);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.comboBoxBL);
+            this.Controls.Add(this.comboBoxWZ);
             this.Controls.Add(this.label7);
-            this.Controls.Add(this.textBili);
+            this.Controls.Add(this.textCC);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textPy);
             this.Controls.Add(this.textPx);
@@ -590,9 +602,9 @@
         private System.Windows.Forms.TextBox textPx;
         private System.Windows.Forms.TextBox textPy;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBili;
+        private System.Windows.Forms.TextBox textCC;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ComboBox comboBoxBL;
+        private System.Windows.Forms.ComboBox comboBoxWZ;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox textWzbl;
@@ -617,6 +629,7 @@
         private System.Windows.Forms.ComboBox comboDJ;
         private System.Windows.Forms.CheckBox isSaveSources;
         private System.Windows.Forms.ComboBox comboBoxYz;
+        private System.Windows.Forms.Label label13;
     }
 }
 
