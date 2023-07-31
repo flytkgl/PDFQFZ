@@ -22,7 +22,7 @@ namespace PDFQFZ
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
         DataTable dtYz = new DataTable();//PDF列表
         string sourcePath = "",outputPath = "",imgPath = "",previewPath = "",signText = "", password="";
-        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250;
+        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250,maxfgs = 20;
         Bitmap imgYz = null;
         X509Certificate2 cert = null;//证书
 
@@ -138,6 +138,10 @@ namespace PDFQFZ
                     else if (!int.TryParse(textWzbl.Text, out wz) || wz > 100)
                     {
                         MessageBox.Show("骑缝章位置设置错误,请输入100以内的整数。");
+                    }
+                    else if (!int.TryParse(textMaxFgs.Text, out maxfgs))
+                    {
+                        MessageBox.Show("最大分割数设置错误,请输入正确的整数。");
                     }
                     else
                     {
@@ -459,7 +463,7 @@ namespace PDFQFZ
 
                 if(qfzType != 1&& qfzPages > 1)
                 {
-                    int max = 20;//骑缝章最大分割数
+                    int max = maxfgs;//骑缝章最大分割数
                     int ss = qfzPages / max + 1;
                     int sy = qfzPages - ss * max / 2;
                     int sys = sy / ss;

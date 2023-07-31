@@ -74,6 +74,8 @@
             this.isSaveSources = new System.Windows.Forms.CheckBox();
             this.comboBoxYz = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
+            this.textMaxFgs = new System.Windows.Forms.TextBox();
+            this.label14 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -129,9 +131,9 @@
             // 
             // GzPath
             // 
-            this.GzPath.Location = new System.Drawing.Point(360, 142);
+            this.GzPath.Location = new System.Drawing.Point(360, 143);
             this.GzPath.Name = "GzPath";
-            this.GzPath.Size = new System.Drawing.Size(75, 23);
+            this.GzPath.Size = new System.Drawing.Size(75, 22);
             this.GzPath.TabIndex = 6;
             this.GzPath.Text = "导入";
             this.GzPath.UseVisualStyleBackColor = true;
@@ -229,7 +231,7 @@
             // 
             // textCC
             // 
-            this.textCC.Location = new System.Drawing.Point(45, 199);
+            this.textCC.Location = new System.Drawing.Point(185, 122);
             this.textCC.Name = "textCC";
             this.textCC.Size = new System.Drawing.Size(23, 21);
             this.textCC.TabIndex = 19;
@@ -238,7 +240,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(74, 202);
+            this.label7.Location = new System.Drawing.Point(214, 125);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(17, 12);
             this.label7.TabIndex = 20;
@@ -426,7 +428,7 @@
             // 
             // textRotation
             // 
-            this.textRotation.Location = new System.Drawing.Point(130, 200);
+            this.textRotation.Location = new System.Drawing.Point(282, 122);
             this.textRotation.Name = "textRotation";
             this.textRotation.Size = new System.Drawing.Size(23, 21);
             this.textRotation.TabIndex = 39;
@@ -435,7 +437,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(97, 204);
+            this.label10.Location = new System.Drawing.Point(249, 126);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(29, 12);
             this.label10.TabIndex = 38;
@@ -444,7 +446,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(159, 204);
+            this.label9.Location = new System.Drawing.Point(311, 126);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(17, 12);
             this.label9.TabIndex = 40;
@@ -453,7 +455,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(252, 204);
+            this.label11.Location = new System.Drawing.Point(420, 126);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(11, 12);
             this.label11.TabIndex = 43;
@@ -461,7 +463,7 @@
             // 
             // textOpacity
             // 
-            this.textOpacity.Location = new System.Drawing.Point(223, 200);
+            this.textOpacity.Location = new System.Drawing.Point(391, 122);
             this.textOpacity.Name = "textOpacity";
             this.textOpacity.Size = new System.Drawing.Size(23, 21);
             this.textOpacity.TabIndex = 42;
@@ -470,7 +472,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(177, 204);
+            this.label12.Location = new System.Drawing.Point(345, 126);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(41, 12);
             this.label12.TabIndex = 41;
@@ -514,11 +516,28 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(12, 204);
+            this.label13.Location = new System.Drawing.Point(128, 127);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(29, 12);
+            this.label13.Size = new System.Drawing.Size(53, 12);
             this.label13.TabIndex = 47;
-            this.label13.Text = "尺寸";
+            this.label13.Text = "印章尺寸";
+            // 
+            // textMaxFgs
+            // 
+            this.textMaxFgs.Location = new System.Drawing.Point(116, 200);
+            this.textMaxFgs.Name = "textMaxFgs";
+            this.textMaxFgs.Size = new System.Drawing.Size(32, 21);
+            this.textMaxFgs.TabIndex = 49;
+            this.textMaxFgs.Text = "20";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(12, 204);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(101, 12);
+            this.label14.TabIndex = 48;
+            this.label14.Text = "骑缝章最大分割数";
             // 
             // Form1
             // 
@@ -526,6 +545,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.textMaxFgs);
+            this.Controls.Add(this.label14);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.comboBoxYz);
             this.Controls.Add(this.isSaveSources);
@@ -574,7 +595,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.16";
+            this.Text = "PDF加盖骑缝章 V1.18";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -630,6 +651,8 @@
         private System.Windows.Forms.CheckBox isSaveSources;
         private System.Windows.Forms.ComboBox comboBoxYz;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.TextBox textMaxFgs;
+        private System.Windows.Forms.Label label14;
     }
 }
 
