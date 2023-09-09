@@ -22,9 +22,10 @@ namespace PDFQFZ
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
         DataTable dtYz = new DataTable();//PDF列表
         string sourcePath = "",outputPath = "",imgPath = "",previewPath = "",signText = "", password="";
-        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250,maxfgs = 20;
+        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, qbflag = 0, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250, maxfgs = 20;
         Bitmap imgYz = null;
         X509Certificate2 cert = null;//证书
+        float xzbl = 1f;
 
 
 
@@ -55,6 +56,7 @@ namespace PDFQFZ
             comboDJ.SelectedIndex = djType;
             comboQmtype.SelectedIndex = qmType;
             comboBoxWZ.SelectedIndex = wzType;
+            comboBoxQB.SelectedIndex = qbflag;
             fw = this.Width;
             fh = this.Height;
             dtYz.Columns.Add("Name", typeof(string));
@@ -100,6 +102,7 @@ namespace PDFQFZ
             djType = comboDJ.SelectedIndex;
             qmType = comboQmtype.SelectedIndex;
             wzType = comboBoxWZ.SelectedIndex;
+            qbflag = comboBoxQB.SelectedIndex;
 
             if (qfzType == 1&& yzType == 0 && qmType == 0)
             {
@@ -209,7 +212,8 @@ namespace PDFQFZ
 
                 if (rotation != 0)
                 {
-                    imgYz = RotateImg(imgYz, rotation);
+                    bool qb = qbflag==0?true: false;
+                    imgYz = RotateImg(imgYz, rotation, qb);
                 }
                 if (opacity < 100)
                 {
@@ -329,6 +333,7 @@ namespace PDFQFZ
                 W = w;
             }
 
+            xzbl = 1f * W / w;
 
             //目标位图 
             Bitmap dsImage = new Bitmap(W, H);
@@ -393,7 +398,7 @@ namespace PDFQFZ
         //PDF盖章
         private bool PDFWatermark(string inputfilepath, string outputfilepath)
         {
-            float sfbl = 100f * size * 2.842f / imgYz.Height;
+            float sfbl = 100f * size * xzbl * 2.842f / imgYz.Height;
 
             //PdfGState state = new PdfGState();
             //state.FillOpacity = 0.01f*opacity;//印章图片不透明度

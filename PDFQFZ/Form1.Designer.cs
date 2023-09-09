@@ -76,6 +76,7 @@
             this.label13 = new System.Windows.Forms.Label();
             this.textMaxFgs = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
+            this.comboBoxQB = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -539,12 +540,25 @@
             this.label14.TabIndex = 48;
             this.label14.Text = "骑缝章最大分割数";
             // 
+            // comboBoxQB
+            // 
+            this.comboBoxQB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxQB.FormattingEnabled = true;
+            this.comboBoxQB.Items.AddRange(new object[] {
+            "旋转切边",
+            "不切边"});
+            this.comboBoxQB.Location = new System.Drawing.Point(169, 201);
+            this.comboBoxQB.Name = "comboBoxQB";
+            this.comboBoxQB.Size = new System.Drawing.Size(83, 20);
+            this.comboBoxQB.TabIndex = 50;
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.comboBoxQB);
             this.Controls.Add(this.textMaxFgs);
             this.Controls.Add(this.label14);
             this.Controls.Add(this.label13);
@@ -595,7 +609,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.18";
+            this.Text = "PDF加盖骑缝章 V1.19";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -653,6 +667,7 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox textMaxFgs;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.ComboBox comboBoxQB;
     }
 }
 
