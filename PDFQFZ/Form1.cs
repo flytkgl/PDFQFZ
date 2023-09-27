@@ -10,6 +10,8 @@ using System.Security.Cryptography.X509Certificates;
 using O2S.Components.PDFRender4NET;
 using System.Collections.Generic;
 using iTextSharp.text;
+using iTextSharp.text.exceptions;
+using Org.BouncyCastle.Crypto.Generators;
 
 namespace PDFQFZ
 {
@@ -21,7 +23,7 @@ namespace PDFQFZ
         DataTable dt = new DataTable();//PDF列表
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
         DataTable dtYz = new DataTable();//PDF列表
-        string sourcePath = "",outputPath = "",imgPath = "",previewPath = "",signText = "", password="";
+        string sourcePath = "",outputPath = "",imgPath = "",previewPath = "",signText = "", password="",pdfpassword="";
         int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, qbflag = 0, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250, maxfgs = 20;
         Bitmap imgYz = null;
         X509Certificate2 cert = null;//证书
@@ -119,6 +121,7 @@ namespace PDFQFZ
                 imgPath = comboBoxYz.SelectedValue.ToString();
                 signText = textname.Text;
                 password = textpass.Text;
+                pdfpassword = textpdfpass.Text;
 
                 if (sourcePath != "" && outputPath != "" && (imgPath != "" || qfzType == 1 && yzType == 0))
                 {
@@ -209,15 +212,20 @@ namespace PDFQFZ
                 }
 
                 imgYz = new Bitmap(imgPath);
-
-                if (rotation != 0)
-                {
-                    bool qb = qbflag==0?true: false;
-                    imgYz = RotateImg(imgYz, rotation, qb);
-                }
+                //默认把印章的白色部分重置为透明
+                imgYz = SetWhiteToTransparent(imgYz);
+                //再判断是否需要调整整体的透明度
                 if (opacity < 100)
                 {
                     imgYz = SetImageOpacity(imgYz, opacity);
+                }
+                //再看是否需要旋转印章
+                if (rotation != 0)
+                {
+                    bool qb = qbflag==0?true: false;
+                    int iw = imgYz.Width;
+                    imgYz = RotateImg(imgYz, rotation, qb);
+                    xzbl = 1f*imgYz.Width/iw;
                 }
 
                 //目录模式还是文件模式
@@ -266,9 +274,17 @@ namespace PDFQFZ
                         }
                         string source = file;
                         bool isSurrcess = PDFWatermark(source, output);
-                        if (isSurrcess && djType == 1)
+                        if (isSurrcess)
                         {
-                            PDFToiPDF(output);
+                            if(djType == 1)
+                            {
+                                PDFToiPDF(output);
+                            }
+                            if (pdfpassword != "")
+                            {
+                                string jmoutput = outputPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(file) + "_QFZ_加密.pdf";
+                                EncryptPDF(output, jmoutput, pdfpassword);
+                            }
                         }
                         if (isSurrcess)
                         {
@@ -287,8 +303,30 @@ namespace PDFQFZ
                 MessageBox.Show(ex.ToString());
             }
         }
+        //设置JPG图片白色为透明
+        private Bitmap SetWhiteToTransparent(System.Drawing.Bitmap img)
+        {
+            Bitmap bitmap = new Bitmap(img);
+            // 遍历图片的每个像素
+            for (int x = 0; x < bitmap.Width; x++)
+            {
+                for (int y = 0; y < bitmap.Height; y++)
+                {
+                    Color pixelColor = bitmap.GetPixel(x, y);
+
+                    // 判断像素颜色是否为白色
+                    if (pixelColor.R > 230 && pixelColor.G > 230 && pixelColor.B > 230)
+                    {
+                        // 将白色像素设置为透明
+                        bitmap.SetPixel(x, y, Color.Transparent);
+                    }
+                }
+            }
+
+            return bitmap;
+        }
         //设置图片透明度
-        private Bitmap SetImageOpacity(System.Drawing.Image srcImage, int opacity)
+        private Bitmap SetImageOpacity(System.Drawing.Bitmap srcImage, int opacity)
         {
             opacity = opacity * 255/100;
             Bitmap pic = new Bitmap(srcImage);
@@ -313,7 +351,7 @@ namespace PDFQFZ
             return pic;
         }
         //旋转图片
-        public Bitmap RotateImg(System.Drawing.Image b, int angle,bool original = true)
+        public Bitmap RotateImg(System.Drawing.Bitmap bitmap, int angle,bool original = true)
         {
             angle = angle % 360;
             //弧度转换 
@@ -321,19 +359,17 @@ namespace PDFQFZ
             double cos = Math.Cos(radian);
             double sin = Math.Sin(radian);
             //原图的宽和高 
-            int w = b.Width;
-            int h = b.Height;
+            int w = bitmap.Width;
+            int h = bitmap.Height;
             int W = (int)(Math.Max(Math.Abs(w * cos - h * sin), Math.Abs(w * cos + h * sin)));
             int H = (int)(Math.Max(Math.Abs(w * sin - h * cos), Math.Abs(w * sin + h * cos)));
 
+            //为了尽可能的去除白边,减小印章旋转后尺寸的误差,这里保持原印章宽度,切掉部分角
             if (original)
             {
-                //为了尽可能的去除白边,减小印章旋转后尺寸的误差,这里保持原印章宽度,切掉部分角
                 H = H * w / W;
                 W = w;
             }
-
-            xzbl = 1f * W / w;
 
             //目标位图 
             Bitmap dsImage = new Bitmap(W, H);
@@ -349,7 +385,7 @@ namespace PDFQFZ
             g.RotateTransform(angle);
             //恢复图像在水平和垂直方向的平移 
             g.TranslateTransform(-center.X, -center.Y);
-            g.DrawImage(b, rect);
+            g.DrawImage(bitmap, rect);
             //重至绘图的所有变换 
             g.ResetTransform();
             g.Save();
@@ -408,7 +444,7 @@ namespace PDFQFZ
             PdfStamper pdfStamper = null;
             try
             {
-                pdfReader = new PdfReader(inputfilepath);//选择需要印章的pdf
+                pdfReader = new PdfReader(inputfilepath, new System.Text.UTF8Encoding().GetBytes(pdfpassword));//选择需要印章的pdf
                 if (qmType != 0)
                 {
                     //最后的true表示保留原签名
@@ -727,6 +763,11 @@ namespace PDFQFZ
                 }
                 return true;
             }
+            catch (BadPasswordException)
+            {
+                MessageBox.Show("PDF密码错误.");
+                return false;
+            }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
@@ -801,6 +842,28 @@ namespace PDFQFZ
                     pdfReader.Close();
             }
 
+        }
+        //加密PDF文件
+        public static void EncryptPDF(string inputFilePath, string outputFilePath, string password)
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write))
+                {
+                    using (PdfReader reader = new PdfReader(inputFilePath))
+                    {
+                        using (Document document = new Document())
+                        {
+                            PdfEncryptor.Encrypt(reader, fs, true, password, password, PdfWriter.ALLOW_PRINTING);
+                        }
+                    }
+                }
+                File.Delete(inputFilePath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("添加密码保护时发生错误：" + ex.Message);
+            }
         }
 
         private void SaveSources(object sender, EventArgs e)

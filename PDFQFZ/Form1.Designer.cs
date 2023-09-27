@@ -77,6 +77,8 @@
             this.textMaxFgs = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.comboBoxQB = new System.Windows.Forms.ComboBox();
+            this.textpdfpass = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -169,12 +171,12 @@
             // 
             // log
             // 
-            this.log.Location = new System.Drawing.Point(12, 226);
+            this.log.Location = new System.Drawing.Point(12, 223);
             this.log.Multiline = true;
             this.log.Name = "log";
             this.log.ReadOnly = true;
             this.log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.log.Size = new System.Drawing.Size(423, 121);
+            this.log.Size = new System.Drawing.Size(423, 124);
             this.log.TabIndex = 10;
             this.log.Text = "提示:使用合并模式会导致文字不可编辑,并且原数字签名丢失.随意骑缝章和自定义加印章共用右边的预览定位,所以同时使用的时候会冲突,建议分开盖章";
             // 
@@ -256,7 +258,7 @@
             "下",
             "左",
             "右"});
-            this.comboBoxWZ.Location = new System.Drawing.Point(342, 200);
+            this.comboBoxWZ.Location = new System.Drawing.Point(342, 198);
             this.comboBoxWZ.Name = "comboBoxWZ";
             this.comboBoxWZ.Size = new System.Drawing.Size(44, 20);
             this.comboBoxWZ.TabIndex = 22;
@@ -264,7 +266,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(271, 203);
+            this.label6.Location = new System.Drawing.Point(271, 201);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(65, 12);
             this.label6.TabIndex = 23;
@@ -273,7 +275,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(421, 203);
+            this.label8.Location = new System.Drawing.Point(421, 201);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(11, 12);
             this.label8.TabIndex = 25;
@@ -281,7 +283,7 @@
             // 
             // textWzbl
             // 
-            this.textWzbl.Location = new System.Drawing.Point(392, 199);
+            this.textWzbl.Location = new System.Drawing.Point(392, 197);
             this.textWzbl.Name = "textWzbl";
             this.textWzbl.Size = new System.Drawing.Size(23, 21);
             this.textWzbl.TabIndex = 24;
@@ -525,7 +527,7 @@
             // 
             // textMaxFgs
             // 
-            this.textMaxFgs.Location = new System.Drawing.Point(116, 200);
+            this.textMaxFgs.Location = new System.Drawing.Point(116, 198);
             this.textMaxFgs.Name = "textMaxFgs";
             this.textMaxFgs.Size = new System.Drawing.Size(32, 21);
             this.textMaxFgs.TabIndex = 49;
@@ -534,7 +536,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(12, 204);
+            this.label14.Location = new System.Drawing.Point(12, 202);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(101, 12);
             this.label14.TabIndex = 48;
@@ -547,10 +549,27 @@
             this.comboBoxQB.Items.AddRange(new object[] {
             "旋转切边",
             "不切边"});
-            this.comboBoxQB.Location = new System.Drawing.Point(169, 201);
+            this.comboBoxQB.Location = new System.Drawing.Point(169, 199);
             this.comboBoxQB.Name = "comboBoxQB";
             this.comboBoxQB.Size = new System.Drawing.Size(83, 20);
             this.comboBoxQB.TabIndex = 50;
+            // 
+            // textpdfpass
+            // 
+            this.textpdfpass.Location = new System.Drawing.Point(304, 35);
+            this.textpdfpass.Name = "textpdfpass";
+            this.textpdfpass.PasswordChar = '*';
+            this.textpdfpass.Size = new System.Drawing.Size(131, 21);
+            this.textpdfpass.TabIndex = 52;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(252, 39);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(47, 12);
+            this.label15.TabIndex = 51;
+            this.label15.Text = "PDF密码";
             // 
             // Form1
             // 
@@ -558,6 +577,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(447, 361);
+            this.Controls.Add(this.textpdfpass);
+            this.Controls.Add(this.label15);
             this.Controls.Add(this.comboBoxQB);
             this.Controls.Add(this.textMaxFgs);
             this.Controls.Add(this.label14);
@@ -609,7 +630,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章 V1.19";
+            this.Text = "PDF加盖骑缝章 V1.20";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -668,6 +689,8 @@
         private System.Windows.Forms.TextBox textMaxFgs;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.ComboBox comboBoxQB;
+        private System.Windows.Forms.TextBox textpdfpass;
+        private System.Windows.Forms.Label label15;
     }
 }
 
