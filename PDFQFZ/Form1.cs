@@ -13,6 +13,7 @@ using iTextSharp.text;
 using iTextSharp.text.exceptions;
 using Org.BouncyCastle.Crypto.Generators;
 using PDFQFZ.Library;
+using System.Text;
 
 namespace PDFQFZ
 {
@@ -25,7 +26,7 @@ namespace PDFQFZ
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
         DataTable dtYz = new DataTable();//PDF列表
         string sourcePath = "",outputPath = "",imgPath = "",previewPath = "",signText = "", password="",pdfpassword="";
-        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, yzIndex = -1, qbflag = 0, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 10, maximg = 250, maxfgs = 20;
+        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, yzIndex = -1, qbflag = 0, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 30, maximg = 500, maxfgs = 20;
         Bitmap imgYz = null;
         X509Certificate2 cert = null;//证书
         float xzbl = 1f;
@@ -89,7 +90,7 @@ namespace PDFQFZ
             fh = this.Height;
             if (yzType != 0 || qfzType == 4)
             {
-                this.Size = new Size(fw + 267, fh);
+                this.Size = new Size(fw + 517, fh);
             }
             else
             {
@@ -1457,9 +1458,9 @@ namespace PDFQFZ
                 imgStartPage = 1;
                 imgPageCount = 1;
                 labelPage.Text = "1/1";
-                Bitmap bmp = new Bitmap(177, 250);
+                Bitmap bmp = new Bitmap(358, 500);
                 Graphics g = Graphics.FromImage(bmp);
-                g.FillRectangle(Brushes.White, new System.Drawing.Rectangle(0, 0, 177, 250));
+                g.FillRectangle(Brushes.White, new System.Drawing.Rectangle(0, 0, 358, 500));
                 g.Dispose();
                 pictureBox1.Image = bmp;
             }
@@ -1470,7 +1471,7 @@ namespace PDFQFZ
         {
             if (comboYz.SelectedIndex != 0 || comboQfz.SelectedIndex == 4)
             {
-                this.Size = new Size(fw + 267, fh);
+                this.Size = new Size(fw + 517, fh);
             }
             else
             {
@@ -1483,7 +1484,7 @@ namespace PDFQFZ
         {
             if (comboYz.SelectedIndex != 0 || comboQfz.SelectedIndex == 4)
             {
-                this.Size = new Size(fw + 267, fh);
+                this.Size = new Size(fw + 517, fh);
             }
             else
             {
