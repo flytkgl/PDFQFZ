@@ -166,11 +166,14 @@ namespace PDFQFZ
             if (!File.Exists(yzLog))
             {
                 yzIndex = -1;
-                //为了避免误删印章记录,然后下次打开又不盖章,再打开可能的报错,这里先重置下印章索引
-                IniFileHelper iniFileHelper = new IniFileHelper(strIniFilePath);
-                string section = "config";
-                iniFileHelper.WriteIniString(section, "yzIndex", yzIndex.ToString());
-
+                if (File.Exists(strIniFilePath))
+                {
+                    //为了避免误删印章记录,然后下次打开又不盖章,再打开可能的报错,这里先重置下印章索引
+                    IniFileHelper iniFileHelper = new IniFileHelper(strIniFilePath);
+                    string section = "config";
+                    iniFileHelper.WriteIniString(section, "yzIndex", yzIndex.ToString());
+                }
+                
                 File.Create(yzLog).Close();
             }
             else
