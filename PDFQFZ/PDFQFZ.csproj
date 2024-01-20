@@ -70,6 +70,9 @@
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>PDFQFZ.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="O2S.Components.PDFRender4NET">
       <HintPath>D:\Downloads\O2S.Components.PDFRender4NET.dll</HintPath>

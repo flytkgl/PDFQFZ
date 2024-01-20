@@ -42,12 +42,19 @@ namespace PDFQFZ
             byte[] bytes = (byte[])rm.GetObject(dllName);
             return System.Reflection.Assembly.Load(bytes);
         }
-        public Form1()
+        public Form1(string[] args)
         {
             //在InitializeComponent()之前调用
 
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             InitializeComponent();
+            // 在这里处理命令行参数
+            if (args.Length > 0)
+            {
+                // 根据参数执行相应的逻辑
+                sourcePath = string.Join(",", args); ;
+                outputPath = System.IO.Path.GetDirectoryName(args[0]);
+            }
         }
 
 
@@ -166,10 +173,13 @@ namespace PDFQFZ
             if (!File.Exists(yzLog))
             {
                 yzIndex = -1;
-                //为了避免误删印章记录,然后下次打开又不盖章,再打开可能的报错,这里先重置下印章索引
-                IniFileHelper iniFileHelper = new IniFileHelper(strIniFilePath);
-                string section = "config";
-                iniFileHelper.WriteIniString(section, "yzIndex", yzIndex.ToString());
+                if (File.Exists(strIniFilePath))
+                {
+                    //为了避免误删印章记录,然后下次打开又不盖章,再打开可能的报错,这里先重置下印章索引
+                    IniFileHelper iniFileHelper = new IniFileHelper(strIniFilePath);
+                    string section = "config";
+                    iniFileHelper.WriteIniString(section, "yzIndex", yzIndex.ToString());
+                }
 
                 File.Create(yzLog).Close();
             }
@@ -198,6 +208,13 @@ namespace PDFQFZ
             dtPos.Columns.Add("X", typeof(float));
             dtPos.Columns.Add("Y", typeof(float));
             isSaveSources.Enabled = false;
+            if(sourcePath != "")
+            {
+                wjType = 1;
+                comboType.SelectedIndex = wjType;
+                pathText.Text = sourcePath;
+                textBCpath.Text = outputPath;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
