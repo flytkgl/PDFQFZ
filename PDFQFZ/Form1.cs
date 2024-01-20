@@ -180,7 +180,6 @@ namespace PDFQFZ
                     string section = "config";
                     iniFileHelper.WriteIniString(section, "yzIndex", yzIndex.ToString());
                 }
-
                 File.Create(yzLog).Close();
             }
             else
