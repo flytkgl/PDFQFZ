@@ -76,6 +76,9 @@
             this.comboBoxQB = new System.Windows.Forms.ComboBox();
             this.textpdfpass = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
+            this.comboBoxPages = new System.Windows.Forms.ComboBox();
+            this.textDpi = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -185,7 +188,9 @@
             this.log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.log.Size = new System.Drawing.Size(441, 119);
             this.log.TabIndex = 10;
-            this.log.Text = "提示:使用合并模式会导致文字不可编辑,并且原数字签名丢失.随意骑缝章和自定义加印章共用右边的预览定位,所以同时使用的时候会冲突,建议分开盖章";
+            this.log.Text = "提示:建议使用300DPI的印章图片(如40mm的印章,对应的像素为472,计算公式为:40毫米 / 25.4毫米每英寸 * 300 DPI ≈ 472 像素)." +
+    "\r\nPDF文件常见的DPI有72/150/300,如果填写错误会导致盖出来的印章大小跟实际有差异.\r\n使用合并模式会导致文字不可编辑,并且原数字签名丢失.随意骑" +
+    "缝章和自定义加印章共用右边的预览定位,所以同时使用的时候会冲突,建议分开盖章.";
             // 
             // comboYz
             // 
@@ -202,6 +207,7 @@
             this.comboYz.Name = "comboYz";
             this.comboYz.Size = new System.Drawing.Size(113, 28);
             this.comboYz.TabIndex = 12;
+            this.comboYz.SelectedIndexChanged += new System.EventHandler(this.comboYz_SelectedIndexChanged);
             this.comboYz.SelectionChangeCommitted += new System.EventHandler(this.comboYz_SelectionChangeCommitted);
             // 
             // textPx
@@ -316,6 +322,7 @@
             this.comboQfz.Name = "comboQfz";
             this.comboQfz.Size = new System.Drawing.Size(112, 28);
             this.comboQfz.TabIndex = 27;
+            this.comboQfz.SelectedIndexChanged += new System.EventHandler(this.comboQfz_SelectedIndexChanged);
             this.comboQfz.SelectionChangeCommitted += new System.EventHandler(this.comboQfz_SelectionChangeCommitted);
             // 
             // comboQmtype
@@ -377,18 +384,19 @@
             this.comboPDFlist.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboPDFlist.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.comboPDFlist.FormattingEnabled = true;
-            this.comboPDFlist.Location = new System.Drawing.Point(471, 12);
+            this.comboPDFlist.Location = new System.Drawing.Point(472, 12);
             this.comboPDFlist.Name = "comboPDFlist";
-            this.comboPDFlist.Size = new System.Drawing.Size(289, 28);
+            this.comboPDFlist.Size = new System.Drawing.Size(247, 28);
             this.comboPDFlist.TabIndex = 33;
+            this.comboPDFlist.SelectedIndexChanged += new System.EventHandler(this.comboPDFlist_SelectedIndexChanged);
             this.comboPDFlist.SelectionChangeCommitted += new System.EventHandler(this.comboPDFlist_SelectionChangeCommitted);
             // 
             // buttonNext
             // 
             this.buttonNext.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonNext.Location = new System.Drawing.Point(840, 11);
+            this.buttonNext.Location = new System.Drawing.Point(793, 12);
             this.buttonNext.Name = "buttonNext";
-            this.buttonNext.Size = new System.Drawing.Size(68, 30);
+            this.buttonNext.Size = new System.Drawing.Size(60, 30);
             this.buttonNext.TabIndex = 34;
             this.buttonNext.Text = "下一页";
             this.buttonNext.UseVisualStyleBackColor = true;
@@ -397,9 +405,9 @@
             // buttonUp
             // 
             this.buttonUp.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.buttonUp.Location = new System.Drawing.Point(766, 11);
+            this.buttonUp.Location = new System.Drawing.Point(727, 11);
             this.buttonUp.Name = "buttonUp";
-            this.buttonUp.Size = new System.Drawing.Size(68, 30);
+            this.buttonUp.Size = new System.Drawing.Size(60, 30);
             this.buttonUp.TabIndex = 35;
             this.buttonUp.Text = "上一页";
             this.buttonUp.UseVisualStyleBackColor = true;
@@ -409,7 +417,7 @@
             // 
             this.labelPage.AutoSize = true;
             this.labelPage.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.labelPage.Location = new System.Drawing.Point(914, 16);
+            this.labelPage.Location = new System.Drawing.Point(928, 16);
             this.labelPage.Name = "labelPage";
             this.labelPage.Size = new System.Drawing.Size(31, 20);
             this.labelPage.TabIndex = 36;
@@ -441,7 +449,7 @@
             // textRotation
             // 
             this.textRotation.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textRotation.Location = new System.Drawing.Point(234, 289);
+            this.textRotation.Location = new System.Drawing.Point(273, 324);
             this.textRotation.Name = "textRotation";
             this.textRotation.Size = new System.Drawing.Size(43, 26);
             this.textRotation.TabIndex = 39;
@@ -451,7 +459,7 @@
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label10.Location = new System.Drawing.Point(197, 292);
+            this.label10.Location = new System.Drawing.Point(236, 327);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(37, 20);
             this.label10.TabIndex = 38;
@@ -461,7 +469,7 @@
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label9.Location = new System.Drawing.Point(279, 291);
+            this.label9.Location = new System.Drawing.Point(318, 326);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(15, 20);
             this.label9.TabIndex = 40;
@@ -585,12 +593,48 @@
             this.label15.TabIndex = 51;
             this.label15.Text = "PDF密码";
             // 
+            // comboBoxPages
+            // 
+            this.comboBoxPages.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxPages.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.comboBoxPages.FormattingEnabled = true;
+            this.comboBoxPages.Items.AddRange(new object[] {
+            "叠加",
+            "合并"});
+            this.comboBoxPages.Location = new System.Drawing.Point(859, 12);
+            this.comboBoxPages.Name = "comboBoxPages";
+            this.comboBoxPages.Size = new System.Drawing.Size(63, 28);
+            this.comboBoxPages.TabIndex = 53;
+            this.comboBoxPages.SelectionChangeCommitted += new System.EventHandler(this.comboBoxPages_SelectionChangeCommitted);
+            // 
+            // textDpi
+            // 
+            this.textDpi.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textDpi.Location = new System.Drawing.Point(248, 289);
+            this.textDpi.Name = "textDpi";
+            this.textDpi.Size = new System.Drawing.Size(43, 26);
+            this.textDpi.TabIndex = 55;
+            this.textDpi.Text = "72";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label5.Location = new System.Drawing.Point(182, 292);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(64, 20);
+            this.label5.TabIndex = 54;
+            this.label5.Text = "PDF DPI";
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(467, 561);
+            this.Controls.Add(this.textDpi);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.comboBoxPages);
             this.Controls.Add(this.textpdfpass);
             this.Controls.Add(this.label15);
             this.Controls.Add(this.comboBoxQB);
@@ -641,7 +685,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章(2024新春特别版)";
+            this.Text = "PDF加盖骑缝章(2024端午特别版)";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -699,6 +743,9 @@
         private System.Windows.Forms.ComboBox comboBoxQB;
         private System.Windows.Forms.TextBox textpdfpass;
         private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.ComboBox comboBoxPages;
+        private System.Windows.Forms.TextBox textDpi;
+        private System.Windows.Forms.Label label5;
     }
 }
 
