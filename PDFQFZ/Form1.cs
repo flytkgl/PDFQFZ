@@ -256,6 +256,11 @@ namespace PDFQFZ
                     System.Environment.Exit(0);
                 }
             }
+            else if (yzIndex == -1)
+            {
+                MessageBox.Show("请先选择印章!");
+                return;
+            }
             else
             {
                 sourcePath = pathText.Text;
