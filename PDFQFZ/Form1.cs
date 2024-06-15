@@ -72,7 +72,7 @@ namespace PDFQFZ
                 string QfzType = iniFileHelper.ContentValue(section, "qfzType");//骑缝章类型
                 string YzType = iniFileHelper.ContentValue(section, "yzType");//印章类型
                 string DjType = iniFileHelper.ContentValue(section, "djType");//叠加类型
-                string QmType = iniFileHelper.ContentValue(section, "qmType");//签名类型
+                //string QmType = iniFileHelper.ContentValue(section, "qmType");//签名类型
                 string WzType = iniFileHelper.ContentValue(section, "wzType");//骑缝章位置类型
                 string Qbflag = iniFileHelper.ContentValue(section, "qbflag");//是否切边标记
                 string Size = iniFileHelper.ContentValue(section, "size");//印章尺寸
@@ -87,7 +87,7 @@ namespace PDFQFZ
                 qfzType = ToIntOrDefault(QfzType, 0);
                 yzType = ToIntOrDefault(YzType, 0);
                 djType = ToIntOrDefault(DjType, 0);
-                qmType = ToIntOrDefault(QmType, 0);
+                //qmType = ToIntOrDefault(QmType, 0);
                 wzType = ToIntOrDefault(WzType, 3);
                 qbflag = ToIntOrDefault(Qbflag, 0);
                 size = ToIntOrDefault(Size, 40);
@@ -311,7 +311,7 @@ namespace PDFQFZ
                         iniFileHelper.WriteIniString(section, "qfzType", qfzType.ToString());
                         iniFileHelper.WriteIniString(section, "yzType", yzType.ToString());
                         iniFileHelper.WriteIniString(section, "djType", djType.ToString());
-                        iniFileHelper.WriteIniString(section, "qmType", qmType.ToString());
+                        //iniFileHelper.WriteIniString(section, "qmType", qmType.ToString());
                         iniFileHelper.WriteIniString(section, "wzType", wzType.ToString());
                         iniFileHelper.WriteIniString(section, "qbflag", qbflag.ToString());
                         iniFileHelper.WriteIniString(section, "size", size.ToString());
@@ -843,20 +843,33 @@ namespace PDFQFZ
 
                     if (yzType == 1)
                     {
-                        signpage = numberOfPages;
+                        signpage = numberOfPages;//尾页加印章
                     }
                     else if (yzType == 2)
                     {
-                        signpage = 1;
+                        signpage = 1;//首页加印章
                     }
                     else if (yzType == 3)
                     {
-                        signpage = numberOfPages;
+                        signpage = numberOfPages;//所有页加印章
                         all = true;
                     }
                     else if (yzType == 4)
                     {
-                        signpage = numberOfPages;
+                        signpage = 1;//自定义页加印章
+                        // 遍历 DataTable 的所有行
+                        foreach (DataRow row in dtPos.Rows)
+                        {
+                            if (row["Path"].ToString() == inputfilepath)
+                            {
+                                // 获取当前行的某一列的值，假设这一列的列名为 "ColumnName"
+                                int columnValue = Convert.ToInt32(row["Page"]);
+                                if(columnValue> signpage)
+                                {
+                                    signpage = columnValue;
+                                }
+                            }
+                        }
                         all = true;
                     }
 
@@ -890,8 +903,17 @@ namespace PDFQFZ
                                 hbl = 1 - Convert.ToSingle(dr["Y"].ToString());
                             }
                             img = iTextSharp.text.Image.GetInstance(imgYz, System.Drawing.Imaging.ImageFormat.Png);//创建一个图片对象
-                            Random random = new Random();
-                            img.RotationDegrees = random.Next(-10, 11);//每页的印章设置个随机的角度
+                            int RotationDegrees = 0;
+                            if (i != signpage)
+                            {
+                                Random random = new Random();
+                                RotationDegrees = random.Next(-10, 11);//每页的印章设置个随机的角度
+                            }
+                            else
+                            {
+                                RotationDegrees = 0;
+                            }
+                            img.RotationDegrees = RotationDegrees;
                             //img.Transparency = new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };//这里透明背景的图片会变黑色,所以设置黑色为透明
                             img.ScalePercent(sfbl);//设置图片比例
                             imgW = img.Width * sfbl / 100f;
@@ -1498,6 +1520,7 @@ namespace PDFQFZ
             pictureBox1.Location = new Point(point.X - pictureBox1.Width / 2, point.Y - pictureBox1.Height / 2);
             pictureBox1.Image = pageImage;
             labelPage.Text = imgStartPage + "/" + imgPageCount;
+            pictureBox2.Visible = true;
 
             float px, py;
             DataRow[] arrRow = dtPos.Select("Path = '" + previewPath + "' and Page = " + imgStartPage);
@@ -1730,6 +1753,7 @@ namespace PDFQFZ
         //选择PDF预览文件
         private void comboPDFlist_SelectionChangeCommitted(object sender, EventArgs e)
         {
+            dtPages.Rows.Clear();//清空PDF页下拉项
             previewPath = comboPDFlist.SelectedValue.ToString();
             if (previewPath != "")
             {
@@ -1764,8 +1788,6 @@ namespace PDFQFZ
                 pictureBox1.Image = bmp;
                 buttonUp.Enabled = false;
                 buttonNext.Enabled = false;
-
-                dtPages.Rows.Clear();//情况PDF页下拉项
             }
             
         }
