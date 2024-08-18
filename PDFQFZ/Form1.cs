@@ -14,6 +14,7 @@ using iTextSharp.text.exceptions;
 using Org.BouncyCastle.Crypto.Generators;
 using PDFQFZ.Library;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace PDFQFZ
 {
@@ -893,8 +894,28 @@ namespace PDFQFZ
                                 {
                                     continue;
                                 }
+                                int random_w = 0, random_h = 0;
+                                Random random = new Random();
+                                random_w = random.Next(-5, 6);//随机偏移
+                                random_h = random.Next(-5, 6);//随机偏移
                                 wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
+                                if((wbl + 0.01f * random_w) < 1f)
+                                {
+                                    wbl = wbl + 0.01f * random_w;
+                                }
+                                else
+                                {
+                                    wbl = wbl - 0.01f * random_w;
+                                }
                                 hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
+                                if ((hbl - 0.01f * random_h) > 0f)
+                                {
+                                    hbl = hbl - 0.01f * random_h;
+                                }
+                                else
+                                {
+                                    hbl = hbl + 0.01f * random_h;
+                                }
                             }
                             else
                             {
@@ -1751,29 +1772,13 @@ namespace PDFQFZ
             
         }
         //选择PDF预览文件
-        private void comboPDFlist_SelectionChangeCommitted(object sender, EventArgs e)
+        private async void comboPDFlist_SelectionChangeCommitted(object sender, EventArgs e)
         {
             dtPages.Rows.Clear();//清空PDF页下拉项
             previewPath = comboPDFlist.SelectedValue.ToString();
             if (previewPath != "")
             {
-                PDFFile viewPdfFile = PDFFile.Open(previewPath);
-                imgStartPage = 1;
-                imgPageCount = viewPdfFile.PageCount;
-                viewPdfimgs = new Bitmap[imgPageCount];
-                int dpi = 72;
-                //一次性把PDF所有页都读取到一个图片数组,虽然很卡,但是好像也没有啥好办法
-                for (int i = 0; i < viewPdfFile.PageCount; i++)
-                {
-                    Bitmap pageImage = viewPdfFile.GetPageImage(i, dpi);
-                    viewPdfimgs[i] = pageImage;
-                    //pageImage.Save("D:\\tmp\\img\\" + i + ".png", System.Drawing.Imaging.ImageFormat.Png);
-
-
-                    dtPages.Rows.Add(new object[] { imgStartPage + i, imgStartPage + i });
-                }
-                viewPdfFile.Dispose();
-                viewPDFPage();
+                await LoadPageImagesAsync(previewPath);
             }
             else
             {
@@ -1790,6 +1795,30 @@ namespace PDFQFZ
                 buttonNext.Enabled = false;
             }
             
+        }
+        async Task LoadPageImagesAsync(string previewPath)
+        {
+            PDFFile viewPdfFile = PDFFile.Open(previewPath);
+            imgStartPage = 1;
+            imgPageCount = viewPdfFile.PageCount;
+            viewPdfimgs = new Bitmap[imgPageCount];
+            int dpi = 72;
+
+            // 使用异步方式加载第一页
+            viewPdfimgs[0] = await Task.Run(() => viewPdfFile.GetPageImage(0, dpi));
+            dtPages.Rows.Add(new object[] { 1, 1 });
+            viewPDFPage();
+
+            // 异步加载剩余的页面
+            for (int i = 1; i < viewPdfFile.PageCount; i++)
+            {
+                int currentIndex = i;
+                viewPdfimgs[currentIndex] = await Task.Run(() => viewPdfFile.GetPageImage(currentIndex, dpi));
+                currentIndex++;
+                dtPages.Rows.Add(new object[] { currentIndex, currentIndex });
+            }
+
+            viewPdfFile.Dispose();
         }
         //根据印章类型切换窗口大小
         private void comboYz_SelectionChangeCommitted(object sender, EventArgs e)
