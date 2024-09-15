@@ -74,20 +74,13 @@
     <StartupObject>PDFQFZ.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="O2S.Components.PDFRender4NET">
-      <HintPath>D:\Downloads\O2S.Components.PDFRender4NET.dll</HintPath>
+    <Reference Include="O2S.Components.PDFRender4NET, Version=4.5.1.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Downloads\428a8-main\O2S.Components.PDFRender4NET.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Form1.cs">
@@ -100,8 +93,6 @@
     <Compile Include="Library\IniFileHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="Resources\O2S.Components.PDFRender4NET.dll" />
-    <None Include="Resources\itextsharp.dll" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -145,6 +136,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Costura.Fody">
+      <Version>5.7.0</Version>
+      <IncludeAssets>runtime;compile;build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="iTextSharp">
       <Version>5.5.13.1</Version>
     </PackageReference>

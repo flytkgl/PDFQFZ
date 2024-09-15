@@ -11,9 +11,7 @@ using O2S.Components.PDFRender4NET;
 using System.Collections.Generic;
 using iTextSharp.text;
 using iTextSharp.text.exceptions;
-using Org.BouncyCastle.Crypto.Generators;
 using PDFQFZ.Library;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PDFQFZ
@@ -36,21 +34,8 @@ namespace PDFQFZ
         private string strIniFilePath = $@"{Application.StartupPath}\config.ini";//获取INI文件路径
 
 
-        System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)//把DLL打包到EXE需要用到
-        {
-            // 执行解析逻辑，加载所需的程序集
-            string dllName = args.Name.Contains(",") ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name.Replace(".dll", "");
-            dllName = dllName.Replace(".", "_");
-            if (dllName.EndsWith("_resources")) return null;
-            System.Resources.ResourceManager rm = new System.Resources.ResourceManager(GetType().Namespace + ".Properties.Resources", System.Reflection.Assembly.GetExecutingAssembly());
-            byte[] bytes = (byte[])rm.GetObject(dllName);
-            return System.Reflection.Assembly.Load(bytes);
-        }
         public Form1(string[] args)
         {
-            //在InitializeComponent()之前调用
-
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             InitializeComponent();
             // 在这里处理命令行参数
             if (args.Length > 0)
@@ -1197,7 +1182,7 @@ namespace PDFQFZ
             //原版方法2
             PDFFile pdfFile = PDFFile.Open(pdfPath);
             Bitmap[] bitmaps = new Bitmap[pdfFile.PageCount];
-            int dpi = 300; //原版方法最好默认300
+            int dpi = 200; //原版方法最好默认300
             for (int i = 0; i < pdfFile.PageCount; i++)
             {
                 Bitmap pageImage = pdfFile.GetPageImage(i, dpi);      //这个地方转换导致原有水印和背景透明度丢失，下面的方法解决

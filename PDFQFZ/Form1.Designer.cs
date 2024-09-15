@@ -614,7 +614,7 @@
             this.textDpi.Name = "textDpi";
             this.textDpi.Size = new System.Drawing.Size(43, 26);
             this.textDpi.TabIndex = 55;
-            this.textDpi.Text = "72";
+            this.textDpi.Text = "150";
             // 
             // label5
             // 
@@ -685,7 +685,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章(V1.25)";
+            this.Text = "PDF加盖骑缝章(V1.26)";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

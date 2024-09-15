@@ -59,25 +59,5 @@ namespace PDFQFZ.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   查找 System.Byte[] 类型的本地化资源。
-        /// </summary>
-        internal static byte[] itextsharp {
-            get {
-                object obj = ResourceManager.GetObject("itextsharp", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   查找 System.Byte[] 类型的本地化资源。
-        /// </summary>
-        internal static byte[] O2S_Components_PDFRender4NET {
-            get {
-                object obj = ResourceManager.GetObject("O2S_Components_PDFRender4NET", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }
