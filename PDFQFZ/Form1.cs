@@ -1285,29 +1285,16 @@ namespace PDFQFZ
             {
                 if (Environment.OSVersion.Version.Major >= 6)                                       //操作系统win7及以上才能使用此效果
                 {
-                    var fsd = new FolderSelectDialog();
-                    //FolderSelectDialog fsd = new FolderSelectDialog();
+                    FolderSelectDialog fsd = new FolderSelectDialog();
                     fsd.Title = "请选择pdf所在的文件夹";
-                    if (string.IsNullOrWhiteSpace(pathText.Text.Trim()))
+                    fsd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    if (fsd.ShowDialog(this.Handle))
                     {
-                        string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                        fsd.InitialDirectory = desktopPath;                                                // @"c:\";
-                    }
-                    else
-                    {
-                        //fsd.InitialDirectory = @"c:\";
-                        //fsd.InitialDirectory = appDirecroty;
-                        fsd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;                     //当前程序的基目录不会变
-                    }
-                    if (fsd.ShowDialog(this.Handle))                                                    //IntPtr.Zero和this.Handle区别           
-                    {
-                        //this.pathText.ForeColor = Color.Black;
-                        //this.pathText.Text = fsd.FileName;
-                        pathText.Text = fsd.InitialDirectory;
-                        pathDir = fsd.InitialDirectory;
+                        pathText.Text = fsd.FileName;
+                        pathDir = fsd.FileName;
                         if (textBCpath.Text == "")
                         {
-                            textBCpath.Text = fsd.InitialDirectory + "\\QFZ";
+                            textBCpath.Text = fsd.FileName + "\\QFZ";
                         }
                         dt.Rows.Clear();
                         dt.Rows.Add(new object[] { "", "" });
@@ -1386,21 +1373,20 @@ namespace PDFQFZ
         {
             if (Environment.OSVersion.Version.Major >= 6)                                       //操作系统win7及以上才能使用此效果
             {
-                var fsd = new FolderSelectDialog();
-                //FolderSelectDialog fsd = new FolderSelectDialog();
+                FolderSelectDialog fsd = new FolderSelectDialog();
                 fsd.Title = "请选择保存的文件夹";
                 if (string.IsNullOrWhiteSpace(pathText.Text.Trim()))
                 {
                     string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    fsd.InitialDirectory = desktopPath;                                                // @"c:\";
+                    fsd.InitialDirectory = desktopPath;
                 }
                 else
                 {
-                    fsd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;                     //当前程序的基目录不会变
+                    fsd.InitialDirectory = pathText.Text;
                 }
-                if (fsd.ShowDialog(this.Handle))                                                    //IntPtr.Zero和this.Handle区别           
+                if (fsd.ShowDialog(this.Handle))
                 {
-                    textBCpath.Text = fsd.InitialDirectory;
+                    textBCpath.Text = fsd.FileName;
                 }
             }
             else
