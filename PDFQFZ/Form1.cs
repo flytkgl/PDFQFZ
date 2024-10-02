@@ -32,7 +32,7 @@ namespace PDFQFZ
         X509Certificate2 cert = null;//证书
         float xzbl = 1f;//旋转图片导致长宽变化的比例
         private string strIniFilePath = $@"{Application.StartupPath}\config.ini";//获取INI文件路径
-
+        private bool isSelectionCommitted = false; // 文档预览下拉列表框事件标记位
 
         public Form1(string[] args)
         {
@@ -541,10 +541,14 @@ namespace PDFQFZ
         {
             if (comboPDFlist.SelectedIndex != -1 && comboPDFlist.Items.Count > 0)   //手动选择pdf文件
             {
+                // 标记手动选择动作
+                isSelectionCommitted = true;
                 // 手动创建一个 EventArgs 对象
                 EventArgs eventArgs = new EventArgs();
                 // 调用 comboPDFlist_SelectionChangeCommitted 事件处理程序
                 comboPDFlist_SelectionChangeCommitted(comboPDFlist, eventArgs);
+                // 重置标志
+                isSelectionCommitted = false;
             }
         }
         //设置图片透明度
@@ -1497,6 +1501,12 @@ namespace PDFQFZ
         //显示指定PDF页
         public void viewPDFPage()
         {
+            // 确保 viewPdfimgs 和指定页码的图像不为 null
+            if (viewPdfimgs == null || viewPdfimgs[imgStartPage - 1] == null)
+            {
+                MessageBox.Show("PDF页面尚未加载，请稍候...");
+                return;
+            }
             Bitmap pageImage = viewPdfimgs[imgStartPage - 1];
             Point point = new Point(pictureBox1.Location.X + pictureBox1.Width / 2, pictureBox1.Location.Y + pictureBox1.Height / 2);
             if (pageImage.Width < pageImage.Height)
@@ -1745,11 +1755,18 @@ namespace PDFQFZ
         //选择PDF预览文件
         private async void comboPDFlist_SelectionChangeCommitted(object sender, EventArgs e)
         {
+            if (isSelectionCommitted) return;  // 防止在手动选择过程中重复触发
+
+            isSelectionCommitted = true;  // 设置标志，防止并发操作
+                                          
+            comboPDFlist.Enabled = false;// 禁用下拉列表框，防止重复选择
             dtPages.Rows.Clear();//清空PDF页下拉项
             previewPath = comboPDFlist.SelectedValue.ToString();
             if (previewPath != "")
             {
-                await LoadPageImagesAsync(previewPath);
+                 await LoadPageImagesAsync(previewPath);
+                 isSelectionCommitted = false;  // 异步操作完成，重置标志
+                 comboPDFlist.Enabled = true;
             }
             else
             {
