@@ -13,6 +13,7 @@ using iTextSharp.text;
 using iTextSharp.text.exceptions;
 using PDFQFZ.Library;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace PDFQFZ
 {
@@ -33,10 +34,12 @@ namespace PDFQFZ
         float xzbl = 1f;//旋转图片导致长宽变化的比例
         private string strIniFilePath = $@"{Application.StartupPath}\config.ini";//获取INI文件路径
         private bool isSelectionCommitted = false; // 文档预览下拉列表框事件标记位
+        private CancellationTokenSource cancellationTokenSource;//处理文件进度取消标记
 
         public Form1(string[] args)
         {
             InitializeComponent();
+            this.KeyDown += Esc_Key_Down;//接受键盘ESC响应
             // 在这里处理命令行参数
             if (args.Length > 0)
             {
@@ -1283,8 +1286,11 @@ namespace PDFQFZ
         //建一个全局的目录变量
         string pathDir = "";
         //选择源文件
-        private void SelectPath_Click(object sender, EventArgs e)
+        private async void SelectPath_Click(object sender, EventArgs e)
         {
+            cancellationTokenSource = new CancellationTokenSource();
+            var token = cancellationTokenSource.Token; // 获取取消标记
+
             if (comboType.SelectedIndex == 0)   //目录模式
             {
                 if (Environment.OSVersion.Version.Major >= 6)                                       //操作系统win7及以上才能使用此效果
@@ -1304,13 +1310,35 @@ namespace PDFQFZ
                         dt.Rows.Add(new object[] { "", "" });
                         DirectoryInfo dir = new DirectoryInfo(pathText.Text);
                         var fileInfos = dir.GetFiles("*.pdf", SearchOption.AllDirectories);
-                        foreach (var fileInfo in fileInfos)
+
+                        // 初始化状态栏和进度条
+                        log.Text = "准备批量处理...\r\n";
+                        progressBar1.Visible = true;
+                        bt_gz.Enabled = false;//批量加载时防止用户点击按钮
+                        
+                        //开始异步加载文件
+                        try
                         {
-                            if (fileInfo.Extension == ".pdf")
-                            {
-                                dt.Rows.Add(new object[] { fileInfo.Name, fileInfo.FullName });
-                            }
+                            await Task.Run(() => Load_All_PdfFiles_Async(fileInfos, token), token);
                         }
+                        catch (OperationCanceledException)
+                        {
+                            log.Text = "操作已取消！";
+                        }
+                        finally
+                        {
+                            // 取消后的清理工作
+                            cancellationTokenSource.Dispose();
+                        }
+                        bt_gz.Enabled = true;//恢复盖章按钮
+                        pathText.Text = fsd.FileName;
+                        //foreach (var fileInfo in fileInfos)
+                        //{
+                        //    if (fileInfo.Extension == ".pdf")
+                        //    {
+                        //        dt.Rows.Add(new object[] { fileInfo.Name, fileInfo.FullName });
+                        //    }
+                        //}
                     }
                 }
                 else
@@ -1372,6 +1400,71 @@ namespace PDFQFZ
                 }
             }
         }
+        /// <summary>
+        /// 加载文件夹文件使用异步方式并辅以进度条显示状态，并可以随时按ESC取消
+        /// </summary>
+        private async Task Load_All_PdfFiles_Async(FileInfo[] fileInfos, CancellationToken token)
+        {
+            int totalFiles = fileInfos.Length;
+
+            // 在 UI 线程上更新进度条的最大值和初始值
+            this.Invoke((Action)(() =>
+            {
+                progressBar1.Maximum = totalFiles;
+                progressBar1.Value = 0;
+                log.Text += "开始批量处理...\r\n";
+            }));
+
+
+            // 遍历文件
+            await Task.Run(() =>
+            {
+                for (int i = 0; i < totalFiles; i++)
+                {
+                    token.ThrowIfCancellationRequested(); // 检查是否有取消请求,如果有结束遍历动作
+
+                    var fileInfo = fileInfos[i];
+
+                    // 更新UI（此处要使用 Invoke，因为跨线程更新UI）
+                    Invoke(new Action(() =>
+                    {
+                        dt.Rows.Add(new object[] { fileInfo.Name, fileInfo.FullName });
+
+                        // 更新进度条和状态栏
+                        pathText.Text = $"正在加载文件 {i + 1}/{totalFiles}\r\n";
+                        progressBar1.Value = i + 1;
+                    }));
+
+                    // 模拟加载延时（可以去掉或根据需要调整）
+                    Task.Delay(100).Wait();
+                }
+            });
+
+            // 所有文件加载完成后更新状态
+            Invoke(new Action(() =>
+            {
+                log.Text = "加载完成!";
+                progressBar1.Value = totalFiles;
+                progressBar1.Visible = false;
+            }));
+        }
+        //按下ESC事件
+        private void Esc_Key_Down(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                // 检查是否有一个操作在进行中
+                if (cancellationTokenSource != null)
+                {
+                    cancellationTokenSource.Cancel(); // 请求取消当前操作
+                    MessageBox.Show("操作已停止");
+                    progressBar1.Visible = false;
+                    bt_gz.Enabled = true;
+                    pathText.Text = "";
+                }
+            }
+        }
+
         //选择保存目录
         private void OutPath_Click(object sender, EventArgs e)
         {

@@ -79,6 +79,7 @@
             this.comboBoxPages = new System.Windows.Forms.ComboBox();
             this.textDpi = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -626,12 +627,21 @@
             this.label5.TabIndex = 54;
             this.label5.Text = "PDF DPI";
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(97, 101);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(357, 3);
+            this.progressBar1.TabIndex = 56;
+            this.progressBar1.Visible = false;
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(467, 561);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.textDpi);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.comboBoxPages);
@@ -683,6 +693,7 @@
             this.Controls.Add(this.bt_gz);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "PDF加盖骑缝章(V1.27)";
@@ -746,6 +757,7 @@
         private System.Windows.Forms.ComboBox comboBoxPages;
         private System.Windows.Forms.TextBox textDpi;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }
 
