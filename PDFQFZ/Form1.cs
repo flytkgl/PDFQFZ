@@ -33,8 +33,9 @@ namespace PDFQFZ
         X509Certificate2 cert = null;//证书
         float xzbl = 1f;//旋转图片导致长宽变化的比例
         private string strIniFilePath = $@"{Application.StartupPath}\config.ini";//获取INI文件路径
-        private bool isSelectionCommitted = false; // 文档预览下拉列表框事件标记位
+        //private bool isSelectionCommitted = false; // 文档预览下拉列表框事件标记位
         private CancellationTokenSource cancellationTokenSource;//处理文件进度取消标记
+        private CancellationTokenSource cts;//PDF文件异步处理取消标记
 
         public Form1(string[] args)
         {
@@ -545,13 +546,13 @@ namespace PDFQFZ
             if (comboPDFlist.SelectedIndex != -1 && comboPDFlist.Items.Count > 0)   //手动选择pdf文件
             {
                 // 标记手动选择动作
-                isSelectionCommitted = true;
+                //isSelectionCommitted = true;
                 // 手动创建一个 EventArgs 对象
                 EventArgs eventArgs = new EventArgs();
                 // 调用 comboPDFlist_SelectionChangeCommitted 事件处理程序
                 comboPDFlist_SelectionChangeCommitted(comboPDFlist, eventArgs);
                 // 重置标志
-                isSelectionCommitted = false;
+                //isSelectionCommitted = false;
             }
         }
         //设置图片透明度
@@ -1848,18 +1849,52 @@ namespace PDFQFZ
         //选择PDF预览文件
         private async void comboPDFlist_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            if (isSelectionCommitted) return;  // 防止在手动选择过程中重复触发
+            //if (isSelectionCommitted) return;  // 防止在手动选择过程中重复触发
 
-            isSelectionCommitted = true;  // 设置标志，防止并发操作
-                                          
-            comboPDFlist.Enabled = false;// 禁用下拉列表框，防止重复选择
+            //isSelectionCommitted = true;  // 设置标志，防止并发操作
+
+            //comboPDFlist.Enabled = false;// 禁用下拉列表框，防止重复选择
+            // 检查是否有一个操作在进行中
+            if (cts != null)
+            {
+                cts.Cancel(); // 请求取消当前操作
+            }
+
+            cts = new CancellationTokenSource();
+            CancellationToken token = cts.Token;
+
             dtPages.Rows.Clear();//清空PDF页下拉项
             previewPath = comboPDFlist.SelectedValue.ToString();
             if (previewPath != "")
             {
-                 await LoadPageImagesAsync(previewPath);
-                 isSelectionCommitted = false;  // 异步操作完成，重置标志
-                 comboPDFlist.Enabled = true;
+                PDFFile viewPdfFile = PDFFile.Open(previewPath);
+                imgStartPage = 1;
+                imgPageCount = viewPdfFile.PageCount;
+                viewPdfimgs = new Bitmap[imgPageCount];
+                int dpi = 72;
+
+                // 根据提供的数字填充 DataTable
+                for (int i = 1; i <= imgPageCount; i++)
+                {
+                    dtPages.Rows.Add(new object[] { i, i });
+                }
+                // 加载第一页
+                viewPdfimgs[0] = viewPdfFile.GetPageImage(0, dpi);
+                viewPDFPage();
+                // 启动一个任务
+                var task = Task.Run(() => LoadPageImagesAsync(viewPdfFile, token));
+                try
+                {
+                    await task;
+                }
+                catch (OperationCanceledException)
+                {
+                    //cts.Dispose();
+                }
+
+                //await LoadPageImagesAsync(previewPath);
+                //isSelectionCommitted = false;  // 异步操作完成，重置标志
+                //comboPDFlist.Enabled = true;
             }
             else
             {
@@ -1877,26 +1912,15 @@ namespace PDFQFZ
             }
             
         }
-        async Task LoadPageImagesAsync(string previewPath)
+        private void LoadPageImagesAsync(PDFFile viewPdfFile, CancellationToken token)
         {
-            PDFFile viewPdfFile = PDFFile.Open(previewPath);
-            imgStartPage = 1;
-            imgPageCount = viewPdfFile.PageCount;
-            viewPdfimgs = new Bitmap[imgPageCount];
-            int dpi = 72;
-
-            // 使用异步方式加载第一页
-            viewPdfimgs[0] = await Task.Run(() => viewPdfFile.GetPageImage(0, dpi));
-            dtPages.Rows.Add(new object[] { 1, 1 });
-            viewPDFPage();
-
             // 异步加载剩余的页面
             for (int i = 1; i < viewPdfFile.PageCount; i++)
             {
-                int currentIndex = i;
-                viewPdfimgs[currentIndex] = await Task.Run(() => viewPdfFile.GetPageImage(currentIndex, dpi));
-                currentIndex++;
-                dtPages.Rows.Add(new object[] { currentIndex, currentIndex });
+                // 检查是否被请求取消
+                token.ThrowIfCancellationRequested();
+
+                viewPdfimgs[i] = viewPdfFile.GetPageImage(i, dpi);
             }
 
             viewPdfFile.Dispose();
