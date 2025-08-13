@@ -76,7 +76,7 @@
   <ItemGroup>
     <Reference Include="O2S.Components.PDFRender4NET, Version=4.5.1.2, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Downloads\428a8-main\O2S.Components.PDFRender4NET.dll</HintPath>
+      <HintPath>F:\Downloads\O2S.Components.PDFRender4NET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

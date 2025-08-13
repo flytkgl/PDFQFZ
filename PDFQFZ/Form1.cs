@@ -27,7 +27,7 @@ namespace PDFQFZ
         DataTable dtPos = new DataTable();//PDF各文件印章位置表
         DataTable dtYz = new DataTable();//PDF列表
         string sourcePath = "",outputPath = "",imgPath = "",previewPath = "",signText = "", password="",pdfpassword="";
-        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, yzIndex = -1, qbflag = 0, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 30, maximg = 500, maxfgs = 20, dpi = 72;
+        int wjType = 1, qfzType = 0, yzType = 0, djType = 0, qmType = 0, wzType = 3, yzIndex = -1, qbflag = 0, size = 40, rotation = 0, opacity = 100, wz = 50, yzr = 36, maximg = 500, maxfgs = 20;
         Bitmap imgYz = null;
         Bitmap[] viewPdfimgs = null;
         X509Certificate2 cert = null;//证书
@@ -66,7 +66,6 @@ namespace PDFQFZ
                 string WzType = iniFileHelper.ContentValue(section, "wzType");//骑缝章位置类型
                 string Qbflag = iniFileHelper.ContentValue(section, "qbflag");//是否切边标记
                 string Size = iniFileHelper.ContentValue(section, "size");//印章尺寸
-                string Dpi = iniFileHelper.ContentValue(section, "dpi");//DPF的DPI
                 string Rotation = iniFileHelper.ContentValue(section, "rotation");//旋转角度
                 string Opacity = iniFileHelper.ContentValue(section, "opacity");//不透明度
                 string Wz = iniFileHelper.ContentValue(section, "wz");//骑缝章位置
@@ -81,7 +80,6 @@ namespace PDFQFZ
                 wzType = ToIntOrDefault(WzType, 3);
                 qbflag = ToIntOrDefault(Qbflag, 0);
                 size = ToIntOrDefault(Size, 40);
-                dpi = ToIntOrDefault(Dpi, 72);
                 rotation = ToIntOrDefault(Rotation, 0);
                 opacity = ToIntOrDefault(Opacity, 100);
                 wz = ToIntOrDefault(Wz, 50);
@@ -106,12 +104,13 @@ namespace PDFQFZ
             comboBoxWZ.SelectedIndex = wzType;
             comboBoxQB.SelectedIndex = qbflag;
             textCC.Text = size.ToString();
-            textDpi.Text = dpi.ToString();
             textRotation.Text = rotation.ToString();
             textOpacity.Text = opacity.ToString();
             textWzbl.Text = wz.ToString();
             textMaxFgs.Text = maxfgs.ToString();
             textname.Text = signText;
+            pictureBox2.Parent = this.pictureBox1;//设置盖章预览图片的父控件为盖章预览框
+            pictureBox2.Location = new Point(220, 380);//盖章预览图片位置
             if (qmType == 0)
             {
                 labelname.Text = "签名";
@@ -270,10 +269,6 @@ namespace PDFQFZ
                     {
                         MessageBox.Show("印章尺寸设置错误,请输入正确的比例或尺寸。");
                     }
-                    else if(!int.TryParse(textDpi.Text,out dpi))
-                    {
-                        MessageBox.Show("PDF的DPI设置错误,请输入正确的整数。");
-                    }
                     else if (!int.TryParse(textRotation.Text, out rotation))
                     {
                         MessageBox.Show("印章角度设置错误,请输入正确的整数。");
@@ -305,7 +300,6 @@ namespace PDFQFZ
                         iniFileHelper.WriteIniString(section, "wzType", wzType.ToString());
                         iniFileHelper.WriteIniString(section, "qbflag", qbflag.ToString());
                         iniFileHelper.WriteIniString(section, "size", size.ToString());
-                        iniFileHelper.WriteIniString(section, "dpi", dpi.ToString());
                         iniFileHelper.WriteIniString(section, "rotation", rotation.ToString());
                         iniFileHelper.WriteIniString(section, "opacity", opacity.ToString());
                         iniFileHelper.WriteIniString(section, "wz", wz.ToString());
@@ -332,7 +326,7 @@ namespace PDFQFZ
                 Directory.CreateDirectory(outputPath);
             }
 
-            if (log.Text == "提示:建议使用300DPI的印章图片(如40mm的印章,对应的像素为472,计算公式为:40毫米 / 25.4毫米每英寸 * 300 DPI ≈ 472 像素).\r\nPDF文件常见的DPI有72/150/300,如果填写错误会导致盖出来的印章大小跟实际有差异.\r\n使用合并模式会导致文字不可编辑,并且原数字签名丢失.随意骑缝章和自定义加印章共用右边的预览定位,所以同时使用的时候会冲突,建议分开盖章.")
+            if (log.Text == "提示:建议使用472像素以上且背景透明的印章图片.\r\n使用合并模式会导致文字不可编辑,并且原数字签名丢失.随意骑缝章和自定义加印章共用右边的预览定位,所以同时使用的时候会冲突,建议分开盖章.")
             {
                 log.Text = "";//清空日志
             }
@@ -665,7 +659,7 @@ namespace PDFQFZ
         private bool PDFWatermark(string inputfilepath, string outputfilepath)
         {
             //float sfbl = 100f * size * xzbl * 2.842f / imgYz.Height;
-            float sfbl = (100f * size * xzbl * dpi) / (25.4f * imgYz.Width);
+            float sfbl = (100f * size * xzbl * 72) / (25.4f * imgYz.Width);
 
             //PdfGState state = new PdfGState();
             //state.FillOpacity = 0.01f*opacity;//印章图片不透明度
@@ -1566,9 +1560,8 @@ namespace PDFQFZ
                 dtPos.AcceptChanges();
             }
 
-            Point pt1 = pictureBox1.Location;
             pictureBox2.Visible = true;
-            pictureBox2.Location = new Point(pt1.X + pt.X, pt1.Y + pt.Y);
+            pictureBox2.Location = new Point(pt.X, pt.Y);
 
         }
         //文件/目录模式切换
@@ -1645,9 +1638,8 @@ namespace PDFQFZ
             }
             int X = Convert.ToInt32((pictureBox1.Width - 2 * yzr) * px);
             int Y = Convert.ToInt32((pictureBox1.Height - 2 * yzr) * py);
-            Point pt1 = pictureBox1.Location;
 
-            pictureBox2.Location = new Point(pt1.X + X, pt1.Y + Y);
+            pictureBox2.Location = new Point(X, Y);
 
             if (imgStartPage == 1)
             {
@@ -1871,7 +1863,6 @@ namespace PDFQFZ
                 imgStartPage = 1;
                 imgPageCount = viewPdfFile.PageCount;
                 viewPdfimgs = new Bitmap[imgPageCount];
-                int dpi = 72;
 
                 // 根据提供的数字填充 DataTable
                 for (int i = 1; i <= imgPageCount; i++)
@@ -1879,7 +1870,7 @@ namespace PDFQFZ
                     dtPages.Rows.Add(new object[] { i, i });
                 }
                 // 加载第一页
-                viewPdfimgs[0] = viewPdfFile.GetPageImage(0, dpi);
+                viewPdfimgs[0] = viewPdfFile.GetPageImage(0, 72);
                 viewPDFPage();
                 // 启动一个任务
                 var task = Task.Run(() => LoadPageImagesAsync(viewPdfFile, token));
@@ -1920,7 +1911,7 @@ namespace PDFQFZ
                 // 检查是否被请求取消
                 token.ThrowIfCancellationRequested();
 
-                viewPdfimgs[i] = viewPdfFile.GetPageImage(i, dpi);
+                viewPdfimgs[i] = viewPdfFile.GetPageImage(i, 72);
             }
 
             viewPdfFile.Dispose();
