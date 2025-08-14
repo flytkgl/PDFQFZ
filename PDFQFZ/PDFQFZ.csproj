@@ -74,9 +74,8 @@
     <StartupObject>PDFQFZ.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="O2S.Components.PDFRender4NET, Version=4.5.1.2, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\Downloads\O2S.Components.PDFRender4NET.dll</HintPath>
+    <Reference Include="O2S.Components.PDFRender4NET">
+      <HintPath>..\..\..\..\..\Downloads\O2S.Components.PDFRender4NET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

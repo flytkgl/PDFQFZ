@@ -373,8 +373,13 @@ namespace PDFQFZ
                 }
 
                 imgYz = new Bitmap(imgPath);
-                //默认把印章的白色部分重置为透明
-                imgYz = SetWhiteToTransparent(imgYz);
+                //判断印章图片是否PNG格式
+                if (!imgYz.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Png))
+                {
+                    //如果不是PNG格式,则把白色部分设置为透明
+                    imgYz = SetWhiteToTransparent(imgYz);
+                }
+                
                 //再判断是否需要调整整体的透明度
                 if (opacity < 100)
                 {
