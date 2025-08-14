@@ -196,9 +196,9 @@
             this.comboYz.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.comboYz.FormattingEnabled = true;
             this.comboYz.Items.AddRange(new object[] {
-            "不加印章",
-            "尾页加印章",
-            "首页加印章",
+            "全都不加印章",
+            "首页不加印章",
+            "尾页不加印章",
             "所有页加印章",
             "自定义加印章"});
             this.comboYz.Location = new System.Drawing.Point(240, 12);
@@ -673,7 +673,7 @@
             this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章(V1.29)";
+            this.Text = "PDF加盖骑缝章(V1.30)";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

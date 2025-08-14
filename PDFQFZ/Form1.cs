@@ -267,7 +267,7 @@ namespace PDFQFZ
                     }
                     else if (!int.TryParse(textCC.Text, out size) || size > 100)
                     {
-                        MessageBox.Show("印章尺寸设置错误,请输入正确的比例或尺寸。");
+                        MessageBox.Show("印章尺寸设置错误,请输入正确的尺寸。");
                     }
                     else if (!int.TryParse(textRotation.Text, out rotation))
                     {
@@ -831,25 +831,32 @@ namespace PDFQFZ
                     iTextSharp.text.Image img = null;
                     float imgW=0, imgH=0;
                     float xPos=0, yPos=0;
-                    bool all = false;
+                    int no_page = 0;//不需要盖印章的页,0表示所有页都需要盖印章
                     int signpage = 0;
 
-                    if (yzType == 1)
+                    if (yzType == 1)//首页不加印章
                     {
-                        signpage = numberOfPages;//尾页加印章
+                        if(numberOfPages > 1)
+                        {
+                            no_page = 1;
+                        }
+                        signpage = numberOfPages;
                     }
-                    else if (yzType == 2)
+                    else if (yzType == 2)//尾页不加印章
                     {
-                        signpage = 1;//首页加印章
+                        if (numberOfPages > 1)
+                        {
+                            no_page = numberOfPages;
+                        }
+                        signpage = 1;
                     }
-                    else if (yzType == 3)
+                    else if (yzType == 3)//所有页加印章
                     {
-                        signpage = numberOfPages;//所有页加印章
-                        all = true;
+                        signpage = numberOfPages;
                     }
-                    else if (yzType == 4)
+                    else if (yzType == 4)//自定义页加印章
                     {
-                        signpage = 1;//自定义页加印章
+                        signpage = 1;
                         // 遍历 DataTable 的所有行
                         foreach (DataRow row in dtPos.Rows)
                         {
@@ -863,12 +870,11 @@ namespace PDFQFZ
                                 }
                             }
                         }
-                        all = true;
                     }
 
                     for (int i = 1; i <= numberOfPages; i++)
                     {
-                        if (all || i == signpage)
+                        if (no_page == 0 || i != no_page || i == signpage)
                         {
                             waterMarkContent = pdfStamper.GetOverContent(i);//获取当前页内容
                             int rotation = pdfReader.GetPageRotation(i);//获取指定页面的旋转度
@@ -920,7 +926,7 @@ namespace PDFQFZ
                             if (i != signpage)
                             {
                                 Random random = new Random();
-                                RotationDegrees = random.Next(-10, 11);//每页的印章设置个随机的角度
+                                RotationDegrees = random.Next(-5, 6);//每页的印章设置个随机的角度
                             }
                             else
                             {
@@ -985,13 +991,6 @@ namespace PDFQFZ
 
                             ////结束
                             //waterMarkContent.EndText();
-
-
-                            //如果不是所有页都盖章,那对应页盖完后直接跳出循环
-                            if (!all&&i == signpage)
-                            {
-                                break;
-                            }
 
                         }
                     }
@@ -1624,11 +1623,11 @@ namespace PDFQFZ
                 {
                     pictureBox2.Visible = false;
                 }
-                else if (comboYz.SelectedIndex == 1 && imgStartPage == 1 && imgPageCount > 1)   //页数大于1页时，尾页加盖时，首页不显示，只有一页则会显示
+                else if (comboYz.SelectedIndex == 1 && imgStartPage == 1 && imgPageCount > 1)   //首页不加印章，首页不显示，只有一页则会显示
                 {
                     pictureBox2.Visible = false;
                 }
-                else if (comboYz.SelectedIndex == 2 && imgStartPage == imgPageCount && imgPageCount > 1) //页数大于1页时，首页加章，尾页不显示章，只有1页也会显示
+                else if (comboYz.SelectedIndex == 2 && imgStartPage == imgPageCount && imgPageCount > 1) //尾页不加印章，尾页不显示章，只有1页也会显示
                 {
                     pictureBox2.Visible = false;
                 }
