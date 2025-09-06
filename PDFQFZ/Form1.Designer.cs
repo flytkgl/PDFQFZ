@@ -78,6 +78,8 @@
             this.label15 = new System.Windows.Forms.Label();
             this.comboBoxPages = new System.Windows.Forms.ComboBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.checkMultiple = new System.Windows.Forms.CheckBox();
+            this.checkRandom = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -477,7 +479,7 @@
             // textOpacity
             // 
             this.textOpacity.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textOpacity.Location = new System.Drawing.Point(337, 323);
+            this.textOpacity.Location = new System.Drawing.Point(335, 323);
             this.textOpacity.Name = "textOpacity";
             this.textOpacity.Size = new System.Drawing.Size(48, 26);
             this.textOpacity.TabIndex = 42;
@@ -487,7 +489,7 @@
             // 
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label12.Location = new System.Drawing.Point(391, 326);
+            this.label12.Location = new System.Drawing.Point(389, 326);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(63, 20);
             this.label12.TabIndex = 41;
@@ -614,12 +616,36 @@
             this.progressBar1.TabIndex = 56;
             this.progressBar1.Visible = false;
             // 
+            // checkMultiple
+            // 
+            this.checkMultiple.AutoSize = true;
+            this.checkMultiple.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.checkMultiple.Location = new System.Drawing.Point(370, 157);
+            this.checkMultiple.Name = "checkMultiple";
+            this.checkMultiple.Size = new System.Drawing.Size(84, 24);
+            this.checkMultiple.TabIndex = 57;
+            this.checkMultiple.Text = "多章连盖";
+            this.checkMultiple.UseVisualStyleBackColor = true;
+            // 
+            // checkRandom
+            // 
+            this.checkRandom.AutoSize = true;
+            this.checkRandom.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.checkRandom.Location = new System.Drawing.Point(245, 325);
+            this.checkRandom.Name = "checkRandom";
+            this.checkRandom.Size = new System.Drawing.Size(84, 24);
+            this.checkRandom.TabIndex = 58;
+            this.checkRandom.Text = "随机参数";
+            this.checkRandom.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(467, 561);
+            this.Controls.Add(this.checkRandom);
+            this.Controls.Add(this.checkMultiple);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.comboBoxPages);
             this.Controls.Add(this.textpdfpass);
@@ -673,7 +699,7 @@
             this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章(V1.30)";
+            this.Text = "PDF加盖骑缝章(V1.31)";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -733,6 +759,8 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.ComboBox comboBoxPages;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.CheckBox checkMultiple;
+        private System.Windows.Forms.CheckBox checkRandom;
     }
 }
 

@@ -1,19 +1,21 @@
-﻿using System;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Windows.Forms;
+﻿using iTextSharp.text;
+using iTextSharp.text.exceptions;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.security;
+using O2S.Components.PDFRender4NET;
+using PDFQFZ.Library;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using O2S.Components.PDFRender4NET;
-using System.Collections.Generic;
-using iTextSharp.text;
-using iTextSharp.text.exceptions;
-using PDFQFZ.Library;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace PDFQFZ
 {
@@ -207,7 +209,7 @@ namespace PDFQFZ
             dtPos.Columns.Add("X", typeof(float));
             dtPos.Columns.Add("Y", typeof(float));
             isSaveSources.Enabled = false;
-            if(sourcePath != "")
+            if (sourcePath != "")
             {
                 wjType = 1;
                 comboType.SelectedIndex = wjType;
@@ -393,6 +395,8 @@ namespace PDFQFZ
                     imgYz = RotateImg(imgYz, rotation, qb);
                     xzbl = 1f*imgYz.Width/iw;
                 }
+                // 获取系统临时目录
+                string tempDirectory = Path.GetTempPath();
 
                 //目录模式还是文件模式
                 if (wjType == 0)
@@ -401,17 +405,32 @@ namespace PDFQFZ
                     var fileInfos = dir.GetFiles("*.pdf",SearchOption.AllDirectories);
                     foreach (var fileInfo in fileInfos)
                     {
-                        if(fileInfo.Extension == ".pdf")
+                        if (fileInfo.DirectoryName == outputPath)
+                        {
+                            //如果源文件目录跟输出目录一样,则不处理
+                            continue;
+                        }
+                        if (fileInfo.Extension == ".pdf")
                         {
                             string source = fileInfo.DirectoryName + "\\" + fileInfo.Name;
+                            string input = source;
                             string output = outputPath + "\\" + fileInfo.Name;
                             if (isSaveSources.Checked == true)
                             {
-                                output = fileInfo.DirectoryName + "\\" + System.IO.Path.GetFileNameWithoutExtension(fileInfo.Name) + "_已盖章" + fileInfo.Extension;
+                                output = fileInfo.DirectoryName + "\\" + Path.GetFileNameWithoutExtension(fileInfo.Name) + "_已盖章" + fileInfo.Extension;
+
+                            }
+                            if (checkMultiple.Checked == true && File.Exists(output))
+                            {
+                                // 构建目标路径
+                                input = Path.Combine(tempDirectory, fileInfo.Name);
+
+                                // 复制文件（如果目标文件已存在，会覆盖）
+                                File.Copy(output, input, true);
 
                             }
 
-                            bool isSurrcess = PDFWatermark(source, output);
+                            bool isSurrcess = PDFWatermark(input, output, source);
                             if (isSurrcess&&djType==1)
                             {
                                 PDFToiPDF(output);
@@ -432,14 +451,24 @@ namespace PDFQFZ
                     string[] fileArray = sourcePath.Split(',');//字符串转数组
                     foreach (string file in fileArray)
                     {
-                        string filename = System.IO.Path.GetFileName(file);//文件名
+                        string filename = Path.GetFileName(file);//文件名
                         string output = outputPath + "\\" + filename;//输出文件的绝对路径
-                        if (outputPath == System.IO.Path.GetDirectoryName(file))
+                        if (outputPath == Path.GetDirectoryName(file))
                         {
-                            output = outputPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(file) + "_QFZ.pdf";//如果跟源文件在同一个目录需要重命名
+                            output = outputPath + "\\" + Path.GetFileNameWithoutExtension(file) + "_已盖章.pdf";//如果跟源文件在同一个目录需要重命名
                         }
                         string source = file;
-                        bool isSurrcess = PDFWatermark(source, output);
+                        string input = source;
+                        if (checkMultiple.Checked == true && File.Exists(output))
+                        {
+                            // 构建目标路径
+                            input = Path.Combine(tempDirectory, filename);
+
+                            // 复制文件（如果目标文件已存在，会覆盖）
+                            File.Copy(output, input, true);
+
+                        }
+                        bool isSurrcess = PDFWatermark(input, output, source);
                         if (isSurrcess)
                         {
                             if(djType == 1)
@@ -448,7 +477,7 @@ namespace PDFQFZ
                             }
                             if (pdfpassword != "")
                             {
-                                string jmoutput = outputPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(file) + "_QFZ_加密.pdf";
+                                string jmoutput = outputPath + "\\" + Path.GetFileNameWithoutExtension(file) + "_已盖章_加密.pdf";
                                 EncryptPDF(output, jmoutput, pdfpassword);
                             }
                         }
@@ -631,10 +660,10 @@ namespace PDFQFZ
             Bitmap[] nImage = new Bitmap[n];
             int H = img.Height;
             int W = img.Width;
-            int w = W / n;
+            int w1 = W / 3;//首页骑缝章默认占1/3宽度
+            int w = (W- w1) / n;
             n = n - 1;
             int tmpw = W;
-            Random random = new Random();
             for (int i = 0; i <= n; i++)
             {
                 int sw;
@@ -643,11 +672,11 @@ namespace PDFQFZ
                     sw = tmpw;
                 }else if(i == 0)
                 {
-                    sw =w* random.Next(11,15)/ 10;
+                    sw = w1;
                 }
                 else
                 {
-                    sw = w * random.Next(8, 12) / 10;
+                    sw = w;
                 }
                 Bitmap newbitmap = new Bitmap(sw, H);
                 Graphics g = Graphics.FromImage(newbitmap);
@@ -661,7 +690,7 @@ namespace PDFQFZ
         }
 
         //PDF盖章
-        private bool PDFWatermark(string inputfilepath, string outputfilepath)
+        private bool PDFWatermark(string inputfilepath, string outputfilepath, string sourcepath)
         {
             //float sfbl = 100f * size * xzbl * 2.842f / imgYz.Height;
             float sfbl = (100f * size * xzbl * 72) / (25.4f * imgYz.Width);
@@ -672,17 +701,18 @@ namespace PDFQFZ
             //throw new NotImplementedException();
             PdfReader pdfReader = null;
             PdfStamper pdfStamper = null;
+            FileStream fileStream = new FileStream(outputfilepath, FileMode.Create);
             try
             {
                 pdfReader = new PdfReader(inputfilepath, new System.Text.UTF8Encoding().GetBytes(pdfpassword));//选择需要印章的pdf
                 if (qmType != 0)
                 {
                     //最后的true表示保留原签名
-                    pdfStamper = PdfStamper.CreateSignature(pdfReader, new FileStream(outputfilepath, FileMode.Create), '\0', null, true);//加完印章后的pdf
+                    pdfStamper = PdfStamper.CreateSignature(pdfReader, fileStream, '\0', null, true);//加完印章后的pdf
                 }
                 else
                 {
-                    pdfStamper = new PdfStamper(pdfReader,new FileStream(outputfilepath,FileMode.Create));
+                    pdfStamper = new PdfStamper(pdfReader, fileStream);
                 }
 
                 int numberOfPages = pdfReader.NumberOfPages;//pdf页数
@@ -724,7 +754,7 @@ namespace PDFQFZ
                     // 遍历 DataTable 的所有行
                     foreach (DataRow row in dtPos.Rows)
                     {
-                        if (row["Path"].ToString()== inputfilepath)
+                        if (row["Path"].ToString()== sourcepath)
                         {
                             // 获取当前行的某一列的值，假设这一列的列名为 "ColumnName"
                             int columnValue = Convert.ToInt32(row["Page"]);
@@ -860,7 +890,7 @@ namespace PDFQFZ
                         // 遍历 DataTable 的所有行
                         foreach (DataRow row in dtPos.Rows)
                         {
-                            if (row["Path"].ToString() == inputfilepath)
+                            if (row["Path"].ToString() == sourcepath)
                             {
                                 // 获取当前行的某一列的值，假设这一列的列名为 "ColumnName"
                                 int columnValue = Convert.ToInt32(row["Page"]);
@@ -885,34 +915,31 @@ namespace PDFQFZ
 
                             float wbl = 0;
                             float hbl = 1;
-                            DataRow[] arrRow = dtPos.Select("Path = '" + inputfilepath + "' and Page = " + i);
+                            DataRow[] arrRow = dtPos.Select("Path = '" + sourcepath + "' and Page = " + i);
                             if (arrRow == null || arrRow.Length == 0)
                             {
                                 if(yzType == 4)//自定义页加印章,如果没有印章定位的页就不盖
                                 {
                                     continue;
                                 }
-                                int random_w = 0, random_h = 0;
-                                Random random = new Random();
-                                random_w = random.Next(-5, 6);//随机偏移
-                                random_h = random.Next(-5, 6);//随机偏移
+
                                 wbl = Convert.ToSingle(textPx.Text);//这里根据比例来定位
-                                if((wbl + 0.01f * random_w) < 1f)
-                                {
-                                    wbl = wbl + 0.01f * random_w;
-                                }
-                                else
-                                {
-                                    wbl = wbl - 0.01f * random_w;
-                                }
                                 hbl = 1 - Convert.ToSingle(textPy.Text);//这里根据比例来定位
-                                if ((hbl - 0.01f * random_h) > 0f)
+
+                                if (checkRandom.Checked == true)
                                 {
-                                    hbl = hbl - 0.01f * random_h;
-                                }
-                                else
-                                {
-                                    hbl = hbl + 0.01f * random_h;
+                                    int random_w = 0, random_h = 0;
+                                    Random random = new Random();
+                                    random_w = random.Next(-2, 3);//随机偏移
+                                    random_h = random.Next(-2, 3);//随机偏移
+                                    if ((wbl + 0.01f * random_w) > 0f && (wbl + 0.01f * random_w) < 1f)
+                                    {
+                                        wbl = wbl + 0.01f * random_w;
+                                    }
+                                    if ((hbl - 0.01f * random_h) > 0f && (hbl - 0.01f * random_h) < 1f)
+                                    {
+                                        hbl = hbl - 0.01f * random_h;
+                                    }
                                 }
                             }
                             else
@@ -923,10 +950,10 @@ namespace PDFQFZ
                             }
                             img = iTextSharp.text.Image.GetInstance(imgYz, System.Drawing.Imaging.ImageFormat.Png);//创建一个图片对象
                             int RotationDegrees = 0;
-                            if (i != signpage)
+                            if (i != signpage && checkRandom.Checked == true)
                             {
                                 Random random = new Random();
-                                RotationDegrees = random.Next(-5, 6);//每页的印章设置个随机的角度
+                                RotationDegrees = random.Next(-2, 3);//每页的印章设置个随机的角度
                             }
                             else
                             {
@@ -1056,6 +1083,9 @@ namespace PDFQFZ
 
                 if (pdfReader != null)
                     pdfReader.Close();
+
+                if (fileStream != null)
+                    fileStream.Close();
             }
         }
 
@@ -1162,11 +1192,11 @@ namespace PDFQFZ
                 OutPath.Enabled = true;
                 if (comboType.SelectedIndex == 0 && pathText.Text != "")
                 {
-                    textBCpath.Text = pathText.Text +"\\QFZ"; ;
+                    textBCpath.Text = pathText.Text +"\\已盖章"; ;
                 }
                 else if (comboType.SelectedIndex == 1 && pathText.Text != "")
                 {
-                    textBCpath.Text = System.IO.Path.GetDirectoryName(pathText.Text) + "\\QFZ";
+                    textBCpath.Text = System.IO.Path.GetDirectoryName(pathText.Text) + "\\已盖章";
                 }
             }
 
@@ -1199,7 +1229,7 @@ namespace PDFQFZ
             pdfFile.Dispose();
 
             //方法3测试转换为图片
-            //PDFConverter PDFI = new PDFConverter(); //过滤了其他文件和含_QFZ的文件，是转换的原始文件，没有盖章前的，也可以输出盖过的文件，这是验证测试用
+            //PDFConverter PDFI = new PDFConverter(); //过滤了其他文件和含_已盖章的文件，是转换的原始文件，没有盖章前的，也可以输出盖过的文件，这是验证测试用
             //PDFI.ConvertPDFsToImages(pathDir, textBCpath.Text, System.Drawing.Imaging.ImageFormat.Png, 300, 1, pdfFile.PageCount);//后3个参数时dpi 起始页和最后页
 
             //PdfReader reader = new PdfReader(pdfPath);
@@ -1303,7 +1333,7 @@ namespace PDFQFZ
                         pathDir = fsd.FileName;
                         if (textBCpath.Text == "")
                         {
-                            textBCpath.Text = fsd.FileName + "\\QFZ";
+                            textBCpath.Text = fsd.FileName + "\\已盖章";
                         }
                         dt.Rows.Clear();
                         dt.Rows.Add(new object[] { "", "" });
@@ -1349,7 +1379,7 @@ namespace PDFQFZ
                         pathDir = fbd.SelectedPath;
                         if (textBCpath.Text == "")
                         {
-                            textBCpath.Text = fbd.SelectedPath + "\\QFZ";
+                            textBCpath.Text = fbd.SelectedPath + "\\已盖章";
                         }
                         dt.Rows.Clear();
                         dt.Rows.Add(new object[] { "", "" });
@@ -1442,7 +1472,7 @@ namespace PDFQFZ
             // 所有文件加载完成后更新状态
             Invoke(new Action(() =>
             {
-                log.Text = "加载完成!";
+                log.Text = "加载完成!\r\n";
                 progressBar1.Value = totalFiles;
                 progressBar1.Visible = false;
             }));
@@ -1730,7 +1760,7 @@ namespace PDFQFZ
             if (Directory.Exists(filePaths[0])&&comboType.SelectedIndex==0)
             {
                 this.pathText.Text = filePaths[0];
-                this.textBCpath.Text = filePaths[0] + "\\QFZ";
+                this.textBCpath.Text = filePaths[0] + "\\已盖章";
                 dt.Rows.Clear();
                 dt.Rows.Add(new object[] { "", "" });
                 DirectoryInfo dir = new DirectoryInfo(pathText.Text);
