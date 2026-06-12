@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace PDFQFZ.Library
 {
@@ -114,5 +115,158 @@ namespace PDFQFZ.Library
             GetPrivateProfileString(Section, key, "", temp, 1024, strIniFilePath);
             return temp.ToString();
         }
+
+        /// <summary>
+        /// 读取指定 Section 中的全部键值对。
+        /// </summary>
+        /// <param name="section">INI 文件中的节名</param>
+        /// <returns>
+        ///   Dictionary<key, value>，若该节不存在则返回空字典。
+        /// </returns>
+        public Dictionary<string, string> GetAllSectionPairs(string section)
+        {
+            // 1. 先获取该节中所有键的列表（key 为 null 时返回所有键名，以 '\0' 分隔）
+            const int bufferSize = 65535;               // 足够大的缓冲区
+            var keyBuffer = new StringBuilder(bufferSize);
+            long keyCount = GetPrivateProfileString(section, null, "", keyBuffer, bufferSize, strIniFilePath);
+
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (keyCount <= 0) return result;           // 没有键，直接返回空集合
+
+            // 2. 键名之间使用 '\0' 分隔，最后还有一个额外的 '\0'，需要拆分
+            string[] keys = keyBuffer.ToString()
+                                     .Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+
+            // 3. 逐个键读取对应的值并填充到字典
+            foreach (var key in keys)
+            {
+                var valueBuilder = new StringBuilder(bufferSize);
+                GetPrivateProfileString(section, key, "", valueBuilder, bufferSize, strIniFilePath);
+                result[key] = valueBuilder.ToString();
+            }
+            return result;
+        }
+        //usage
+        //var helper = new IniFileHelper(@"C:\Config\app.ini");
+        //var allValues = helper.GetAllSectionValues("Database");
+        //foreach (var kv in allValues)
+        //{
+        //      Console.WriteLine($"{kv.Key} = {kv.Value}");
+        //}
+
+        /// <summary>
+        /// 读取指定节（section）中所有键名。
+        /// </summary>
+        /// <param name="section">INI 文件中的节名。</param>
+        /// <returns>
+        /// 包含该节所有键名的字符串数组。若节不存在或没有键，则返回空数组。
+        /// </returns>
+        private string[] GetSectionKeys(string section)
+        {
+            const int bufferSize = 65535;               // 足够大的缓冲区
+            var keyBuffer = new StringBuilder(bufferSize);
+            long keyCount = GetPrivateProfileString(section, null, "", keyBuffer,
+                                                    bufferSize, strIniFilePath);
+            if (keyCount <= 0) return Array.Empty<string>();
+
+            return keyBuffer.ToString()
+                            .Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        /// <summary>
+        /// 获取指定节下所有键对应的值（不返回键名）。
+        /// </summary>
+        /// <param name="section">INI 文件中的节名。</param>
+        /// <returns> 
+        /// 包含该节所有键值的字符串数组。若节不存在或没有键，则返回空数组。
+        /// </returns>
+        public string[] GetAllSectionValues2(string section)
+        {
+            var keys = GetSectionKeys(section);
+            if (keys.Length == 0) return Array.Empty<string>();
+
+            const int bufferSize = 65535;
+            var values = new string[keys.Length];
+            for (int i = 0; i < keys.Length; i++)
+            {
+                var valBuilder = new StringBuilder(bufferSize);
+                GetPrivateProfileString(section, keys[i], "", valBuilder,
+                                        bufferSize, strIniFilePath);
+                values[i] = valBuilder.ToString();
+            }
+            return values;
+        }
+
+        /// <summary>
+        /// 获取指定节下所有键对应的值（不返回键名）。
+        /// </summary>
+        /// <param name="section">INI 文件中的节名。</param>
+        /// <returns>
+        /// <see cref="List{T}"/>，每个元素为该节中某键的字符串值。  
+        /// 若节不存在或没有键，则返回空列表。
+        /// </returns>
+        public List<string> GetAllSectionValues(string section)
+        {
+            var values = new List<string>();
+            var keys = GetSectionKeys(section);
+            if (keys.Length == 0) return values;
+
+            const int bufferSize = 65535;
+            foreach (var key in keys)
+            {
+                var valBuilder = new StringBuilder(bufferSize);
+                GetPrivateProfileString(section, key, "", valBuilder,
+                                        bufferSize, strIniFilePath);
+                values.Add(valBuilder.ToString());
+            }
+            return values;
+        }
+        //usage
+        //var values = ini.GetAllSectionValues("Server");
+        //foreach (var v in values)
+            //Console.WriteLine(v);
+
+        /// <summary>
+        /// 获取指定节中所有键‑值对。
+        /// </summary>
+        /// <param name="section">INI 文件中的节名。</param>
+        /// <returns>
+        /// <see cref="Dictionary{TKey,TValue}"/>，键为键名，值为对应的字符串值。  
+        /// 若节不存在或没有键，则返回空字典。
+        /// </returns>
+        public Dictionary<string, string> GetAllSectionKeyPairs(string section)
+        {
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var keys = GetSectionKeys(section);
+            if (keys.Length == 0) return result;
+
+            const int bufferSize = 65535;
+            foreach (var key in keys)
+            {
+                var valBuilder = new StringBuilder(bufferSize);
+                GetPrivateProfileString(section, key, "", valBuilder,
+                                        bufferSize, strIniFilePath);
+                result[key] = valBuilder.ToString();
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 检查指定的节（section）是否存在于 INI 文件中。
+        /// </summary>
+        /// <param name="sectionName">要检查的节名。</param>
+        /// <returns>
+        /// true – 节存在且至少有一个键；  
+        /// false – 节不存在或该节为空。
+        /// </returns>
+        public bool SectionExists(string sectionName)
+        {
+            // 通过 WinAPI 获取该节的键列表长度；长度>0 表示节存在
+            const int bufferSize = 2;               // 只需要最小缓冲区
+            var sb = new StringBuilder(bufferSize);
+            long count = GetPrivateProfileString(sectionName, null, "", sb, bufferSize, strIniFilePath);
+            return count > 0;
+        }
+
     }
 }

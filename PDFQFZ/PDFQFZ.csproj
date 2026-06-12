@@ -7,7 +7,7 @@
     <ProjectGuid>{C9DB39C1-307A-4B57-AB38-432FDD5EEE15}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>PDFQFZ</RootNamespace>
-    <AssemblyName>PDFQFZ</AssemblyName>
+    <AssemblyName>$(RootNamespace)</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -44,10 +44,11 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;UNSAFE_MODE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>logo.ico</ApplicationIcon>
@@ -89,8 +90,18 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Library\CommandLineFileLoader.cs" />
     <Compile Include="Library\FolderSelectDialog.cs" />
     <Compile Include="Library\IniFileHelper.cs" />
+    <Compile Include="Library\PageCache.cs" />
+    <Compile Include="Library\PreviewPanelLayout.cs" />
+    <Compile Include="Library\StampPlacementPolicy.cs" />
+    <Compile Include="Library\StampRenderPolicy.cs" />
+    <Compile Include="Library\SeamStampPolicy.cs" />
+    <Compile Include="Library\PreviewOverlayRequestGate.cs" />
+    <Compile Include="Library\PreviewStampLayout.cs" />
+    <Compile Include="Library\PreviewValueSanitizer.cs" />
+    <Compile Include="Library\WhiteTransparencyHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -146,4 +157,8 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

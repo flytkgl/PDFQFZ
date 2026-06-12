@@ -1,4 +1,7 @@
-﻿namespace PDFQFZ
+﻿using System.Reflection;
+using System;
+
+namespace PDFQFZ
 {
     partial class Form1
     {
@@ -13,6 +16,11 @@
         /// <param name="disposing">如果应释放托管资源，为 true；否则为 false。</param>
         protected override void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                CancelPreviewOverlayRefresh();
+                ClearTransparentStampCache();
+            }
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -80,6 +88,8 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.checkMultiple = new System.Windows.Forms.CheckBox();
             this.checkRandom = new System.Windows.Forms.CheckBox();
+            this.cbxTransColor = new System.Windows.Forms.CheckBox();
+            this.txtAllow = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -87,7 +97,7 @@
             // bt_gz
             // 
             this.bt_gz.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.bt_gz.Location = new System.Drawing.Point(201, 388);
+            this.bt_gz.Location = new System.Drawing.Point(175, 388);
             this.bt_gz.Name = "bt_gz";
             this.bt_gz.Size = new System.Drawing.Size(75, 36);
             this.bt_gz.TabIndex = 0;
@@ -238,6 +248,9 @@
             this.textCC.Size = new System.Drawing.Size(42, 26);
             this.textCC.TabIndex = 19;
             this.textCC.Text = "40";
+            this.textCC.TextChanged += new System.EventHandler(this.previewOverlayStyle_Changed);
+            this.textCC.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.previewUnsigned_KeyPress);
+            this.textCC.Leave += new System.EventHandler(this.previewSize_Leave);
             // 
             // label7
             // 
@@ -348,6 +361,7 @@
             this.textname.ReadOnly = true;
             this.textname.Size = new System.Drawing.Size(178, 26);
             this.textname.TabIndex = 30;
+            this.textname.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.textname_MouseDoubleClick);
             // 
             // labelname
             // 
@@ -389,7 +403,6 @@
             this.comboPDFlist.Size = new System.Drawing.Size(247, 28);
             this.comboPDFlist.TabIndex = 33;
             this.comboPDFlist.SelectedIndexChanged += new System.EventHandler(this.comboPDFlist_SelectedIndexChanged);
-            this.comboPDFlist.SelectionChangeCommitted += new System.EventHandler(this.comboPDFlist_SelectionChangeCommitted);
             // 
             // buttonNext
             // 
@@ -427,9 +440,9 @@
             // 
             this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
             this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(790, 400);
+            this.pictureBox2.Location = new System.Drawing.Point(588, 308);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(72, 72);
+            this.pictureBox2.Size = new System.Drawing.Size(153, 168);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox2.TabIndex = 37;
             this.pictureBox2.TabStop = false;
@@ -441,7 +454,7 @@
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(540, 50);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(358, 500);
+            this.pictureBox1.Size = new System.Drawing.Size(381, 500);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 13;
             this.pictureBox1.TabStop = false;
@@ -455,6 +468,9 @@
             this.textRotation.Size = new System.Drawing.Size(43, 26);
             this.textRotation.TabIndex = 39;
             this.textRotation.Text = "0";
+            this.textRotation.TextChanged += new System.EventHandler(this.previewOverlayStyle_Changed);
+            this.textRotation.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.previewSigned_KeyPress);
+            this.textRotation.Leave += new System.EventHandler(this.previewRotation_Leave);
             // 
             // label10
             // 
@@ -483,7 +499,10 @@
             this.textOpacity.Name = "textOpacity";
             this.textOpacity.Size = new System.Drawing.Size(48, 26);
             this.textOpacity.TabIndex = 42;
-            this.textOpacity.Text = "100";
+            this.textOpacity.Text = "60";
+            this.textOpacity.TextChanged += new System.EventHandler(this.previewOverlayStyle_Changed);
+            this.textOpacity.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.previewUnsigned_KeyPress);
+            this.textOpacity.Leave += new System.EventHandler(this.previewOpacity_Leave);
             // 
             // label12
             // 
@@ -532,6 +551,7 @@
             this.comboBoxYz.Name = "comboBoxYz";
             this.comboBoxYz.Size = new System.Drawing.Size(360, 28);
             this.comboBoxYz.TabIndex = 46;
+            this.comboBoxYz.SelectedIndexChanged += new System.EventHandler(this.previewOverlayStyle_Changed);
             // 
             // label13
             // 
@@ -638,13 +658,37 @@
             this.checkRandom.Text = "随机参数";
             this.checkRandom.UseVisualStyleBackColor = true;
             // 
+            // cbxTransColor
+            // 
+            this.cbxTransColor.AutoSize = true;
+            this.cbxTransColor.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.cbxTransColor.Location = new System.Drawing.Point(13, 402);
+            this.cbxTransColor.Name = "cbxTransColor";
+            this.cbxTransColor.Size = new System.Drawing.Size(84, 24);
+            this.cbxTransColor.TabIndex = 57;
+            this.cbxTransColor.Text = "白色透明";
+            this.cbxTransColor.UseVisualStyleBackColor = true;
+            this.cbxTransColor.CheckedChanged += new System.EventHandler(this.previewOverlayStyle_Changed);
+            // 
+            // txtAllow
+            // 
+            this.txtAllow.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.txtAllow.Location = new System.Drawing.Point(97, 401);
+            this.txtAllow.Name = "txtAllow";
+            this.txtAllow.Size = new System.Drawing.Size(30, 26);
+            this.txtAllow.TabIndex = 39;
+            this.txtAllow.Text = "20";
+            this.txtAllow.TextChanged += new System.EventHandler(this.txtAllow_TextChanged);
+            this.txtAllow.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtAllow_KeyPress);
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(467, 561);
+            this.ClientSize = new System.Drawing.Size(469, 561);
             this.Controls.Add(this.checkRandom);
+            this.Controls.Add(this.cbxTransColor);
             this.Controls.Add(this.checkMultiple);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.comboBoxPages);
@@ -660,6 +704,7 @@
             this.Controls.Add(this.textOpacity);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.label9);
+            this.Controls.Add(this.txtAllow);
             this.Controls.Add(this.textRotation);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.pictureBox2);
@@ -699,7 +744,7 @@
             this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "PDF加盖骑缝章(V1.31)";
+            this.Text = "PDF加盖骑缝章(v1.33 AI加强版)";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -761,6 +806,8 @@
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.CheckBox checkMultiple;
         private System.Windows.Forms.CheckBox checkRandom;
+        private System.Windows.Forms.CheckBox cbxTransColor;
+        private System.Windows.Forms.TextBox txtAllow;
     }
 }
 
